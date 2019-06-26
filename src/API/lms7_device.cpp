@@ -1439,8 +1439,7 @@ int LMS7_Device::Init()
         if(SetFrequency(false,2*i,GetFrequency(false,2*i))!=0)
             return -1;
     }
-
-    if (SetRate(10e6,2)!=0)
+    if (SetRate(30.72e6,2)!=0)
         return -1;
     return 0;
 }

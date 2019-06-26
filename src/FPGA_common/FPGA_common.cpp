@@ -192,11 +192,12 @@ int FPGA::SetPllClock(int clockIndex, int nSteps, bool waitLock, uint16_t &reg23
         reg23val |= PHCFG_UPDN;
     else
         reg23val &= ~PHCFG_UPDN;
+    WriteRegisters(addrs.data(), values.data(), values.size());
+    addrs.clear(); values.clear();
     addrs.push_back(0x0023); values.push_back(reg23val); //PHCFG_UpDn, CNT_IND
     addrs.push_back(0x0023); values.push_back(reg23val | PHCFG_START);
 
-    if(WriteRegisters(addrs.data(), values.data(), values.size()) != 0)
-        ReportError(EIO, "SetPllFrequency: PHCFG, failed to write registers");
+    WriteRegisters(addrs.data(), values.data(), values.size());
     addrs.clear(); values.clear();
 
     bool done = false;
@@ -242,7 +243,7 @@ int FPGA::SetPllFrequency(const uint8_t pllIndex, const double inputFreq, FPGA_P
         ReportError(ERANGE, "SetPllFrequency: PLL index(%i) out of range [0-15]", pllIndex);
 
     //check if all clocks are above 5MHz
-    const double PLLlowerLimit = 5e6;
+    const double PLLlowerLimit = 10e6;
     if(inputFreq < PLLlowerLimit)
         return ReportError(ERANGE, "SetPllFrequency: input frequency must be >=%g MHz", PLLlowerLimit/1e6);
     for(int i=0; i<clockCount; ++i)
@@ -273,13 +274,15 @@ int FPGA::SetPllFrequency(const uint8_t pllIndex, const double inputFreq, FPGA_P
     addrs.push_back(0x0023); values.push_back(reg23val); //PLL_IND
     if (clocks->findPhase == false)
     {
+        WriteRegisters(addrs.data(), values.data(), values.size());
+        addrs.clear(); values.clear();
         addrs.push_back(0x0023); values.push_back(reg23val | PLLRST_START);
     }
     WriteRegisters(addrs.data(), values.data(), values.size());
     addrs.clear(); values.clear();
 
-    t1 = chrono::high_resolution_clock::now();
-    if(boardType == LMS_DEV_LIMESDR_QPCIE) do //wait for reset to activate
+    /**/t1 = chrono::high_resolution_clock::now();
+    if(boardType == LMS_DEV_LIMESDR_QPCIE && clocks->findPhase == false) do //wait for reset to activate
     {
         statusReg = ReadRegister(busyAddr);
         done = statusReg & 0x1;
@@ -287,15 +290,16 @@ int FPGA::SetPllFrequency(const uint8_t pllIndex, const double inputFreq, FPGA_P
         std::this_thread::sleep_for(chrono::milliseconds(10));
         t2 = chrono::high_resolution_clock::now();
     } while(not done && errorCode == 0 && (t2-t1) < timeout);
+    printf("done %d errorCode %d\n", done, errorCode);
     if(t2 - t1 > timeout)
         return ReportError(ENODEV, "SetPllFrequency: PLLRST timeout, busy bit is still 1");
     if(errorCode != 0)
         return ReportError(EBUSY, "SetPllFrequency: error resetting PLL");
-
+	/**/
     addrs.push_back(0x0023); values.push_back(reg23val & ~PLLRST_START);
 
     //configure FPGA PLLs
-    const double vcoLimits_Hz[2] = { 600e6, 1300e6 };
+    const double vcoLimits_Hz[2] = { 600e6, 1280e6 };
 
     map< unsigned long, int> availableVCOs; //all available frequencies for VCO
     for(int i=0; i<clockCount; ++i)
@@ -336,7 +340,7 @@ int FPGA::SetPllFrequency(const uint8_t pllIndex, const double inputFreq, FPGA_P
             float coef = (it.first / inputFreq);
             int Ntemp = 1;
             int Mtemp = int(coef + 0.5);
-            while(inputFreq / Ntemp > PLLlowerLimit)
+            /*while(inputFreq / Ntemp > PLLlowerLimit)
             {
                 ++Ntemp;
                 Mtemp = int(coef*Ntemp + 0.5);
@@ -346,7 +350,7 @@ int FPGA::SetPllFrequency(const uint8_t pllIndex, const double inputFreq, FPGA_P
                     Mtemp = int(coef*Ntemp + 0.5);
                     break;
                 }
-            }
+            }*/
             double deviation = fabs(it.first - inputFreq*Mtemp / Ntemp);
             if(deviation <= bestDeviation)
             {
@@ -403,13 +407,14 @@ int FPGA::SetPllFrequency(const uint8_t pllIndex, const double inputFreq, FPGA_P
     addrs.push_back(0x0028); values.push_back(c15_c8_odds_byps);
     if (clockCount != 4 || clocks->index == 3)
     {
+        WriteRegisters(addrs.data(), values.data(), values.size());
+        addrs.clear(); values.clear();
         addrs.push_back(0x0023); values.push_back(reg23val | PLLCFG_START);
     }
-    if(WriteRegisters(addrs.data(), values.data(), values.size()) != 0)
-        lime::error("SetPllFrequency: PLL CFG, failed to write registers");
+    WriteRegisters(addrs.data(), values.data(), values.size());
     addrs.clear(); values.clear();
 
-    t1 = chrono::high_resolution_clock::now();
+    /**/t1 = chrono::high_resolution_clock::now();
     if(boardType == LMS_DEV_LIMESDR_QPCIE) do //wait for config to activate
     {
         statusReg = ReadRegister(busyAddr);
@@ -421,7 +426,7 @@ int FPGA::SetPllFrequency(const uint8_t pllIndex, const double inputFreq, FPGA_P
     if(t2 - t1 > timeout)
         return ReportError(ENODEV, "SetPllFrequency: PLLCFG timeout, busy bit is still 1");
     if(errorCode != 0)
-        return ReportError(EBUSY, "SetPllFrequency: error configuring PLLCFG");
+        return ReportError(EBUSY, "SetPllFrequency: error configuring PLLCFG");/**/
 
     for(int i=0; i<clockCount; ++i)
     {
@@ -450,6 +455,8 @@ int FPGA::SetPllFrequency(const uint8_t pllIndex, const double inputFreq, FPGA_P
 
             addrs.push_back(0x0023); values.push_back(reg23val); //PHCFG_UpDn, CNT_IND
             addrs.push_back(0x0024); values.push_back(abs(nSteps)); //CNT_PHASE
+            WriteRegisters(addrs.data(), values.data(), values.size());
+            addrs.clear(); values.clear();
             addrs.push_back(0x0023); values.push_back(reg23val | PHCFG_START);
 
             if (WriteRegisters(addrs.data(), values.data(), values.size()) != 0)
@@ -665,6 +672,7 @@ int FPGA::UploadWFM(const void* const* samples, uint8_t chCount, size_t sample_c
 
     /*Give some time to load samples to FPGA*/
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    WriteRegister(0x000D, regValue & (~4));
     connection->AbortSending(epIndex);
     if(cnt == 0)
         return 0;

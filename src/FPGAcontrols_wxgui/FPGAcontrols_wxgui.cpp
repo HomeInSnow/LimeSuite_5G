@@ -270,8 +270,9 @@ int FPGAcontrols_wxgui::UploadFile(std::vector<int16_t> isamples, std::vector<in
     btnPlayWFM->Enable(false);
     btnStopWFM->Enable(false);
 
-    const uint8_t chCount = 2;
+    //const uint8_t chCount = 2;
     bool MIMO = chkMIMO->IsChecked();
+    const uint8_t chCount = LMS_GetNumChannels(lmsControl,LMS_CH_TX) > 2 ? 1+MIMO : 2;
 
     vector<vector<complex16_t>> buffers(chCount,vector<complex16_t>(isamples.size()));
 
@@ -383,7 +384,7 @@ void FPGAcontrols_wxgui::OnbtnLoadOnetoneClick(wxCommandEvent& event)
 
 void FPGAcontrols_wxgui::OnbtnLoadWCDMAClick(wxCommandEvent& event)
 {
-    const int samplesCnt = wcdma_wfm_len/4;
+    const int samplesCnt = wcdma_wfm_len/4/16;
     vector<int16_t> isamples;
     vector<int16_t> qsamples;
     isamples.resize(samplesCnt);

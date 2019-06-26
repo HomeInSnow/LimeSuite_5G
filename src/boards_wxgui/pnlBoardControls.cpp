@@ -22,6 +22,7 @@
 #include <vector>
 #include "lms7suiteEvents.h"
 #include "pnlLimeNetMicro.h"
+#include "pnl5G.h"
 
 using namespace std;
 using namespace lime;
@@ -77,7 +78,8 @@ const std::vector<eLMS_DEV> pnlBoardControls::board_list = {LMS_DEV_UNKNOWN,
                                                 LMS_DEV_LIMESDRMINI,
                                                 LMS_DEV_LIMENET_MICRO,
                                                 LMS_DEV_LMS7002M_ULTIMATE_EVB,
-                                                LMS_DEV_LIMESDR_CORE_SDR};
+                                                LMS_DEV_LIMESDR_CORE_SDR,
+                                                LMS_DEV_LIMESDR_USB_SP};
 
 pnlBoardControls::pnlBoardControls(wxWindow* parent, wxWindowID id, const wxString &title, const wxPoint& pos, const wxSize& size, long style) :
     wxFrame(parent, id, title, pos, size, style),
@@ -495,9 +497,16 @@ void pnlBoardControls::SetupControls(const std::string &boardID)
         additionalControls = pnl;
         sizerAdditionalControls->Add(additionalControls);
     }
-    else if (boardID == GetDeviceName(LMS_DEV_LIMESDR_QPCIE))
+    else if (boardID == GetDeviceName(LMS_DEV_LIMESDR_USB_SP))
     {
         pnlQSpark* pnl = new pnlQSpark(this, wxNewId());
+        pnl->Initialize(lmsControl);
+        additionalControls = pnl;
+        sizerAdditionalControls->Add(additionalControls);
+    }
+    else if (boardID == GetDeviceName(LMS_DEV_LIMESDR_QPCIE))
+    {
+        pnlCoreSDR5G* pnl = new pnlCoreSDR5G(this, wxNewId());
         pnl->Initialize(lmsControl);
         additionalControls = pnl;
         sizerAdditionalControls->Add(additionalControls);

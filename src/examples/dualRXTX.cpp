@@ -38,6 +38,9 @@ int main(int argc, char** argv)
     if (LMS_Open(&device, list[0], NULL))
         error();
 
+    if (LMS_LoadConfig(device, "/home/limelt/test.ini"))
+	error();
+#if 0
     //Initialize device with default configuration
     //Do not use if you want to keep existing configuration
     //Use LMS_LoadConfig(device, "/path/to/file.ini") to load config from INI
@@ -98,7 +101,7 @@ int main(int argc, char** argv)
         error();
     if (LMS_SetTestSignal(device, LMS_CH_RX, 1, LMS_TESTSIG_NCODIV8F, 0, 0) != 0)
         error();
-
+#endif 
     //Streaming Setup
 
     const int chCount = 2; //number of RX/TX streams
@@ -108,18 +111,18 @@ int main(int argc, char** argv)
     //All streams setups should be done before starting streams. New streams cannot be set-up if at least stream is running.
     for (int i = 0; i < chCount; ++i)
     {
-        rx_streams[i].channel = i; //channel number
+        rx_streams[i].channel = 2*i; //channel number
         rx_streams[i].fifoSize = 1024 * 1024; //fifo size in samples
         rx_streams[i].throughputVsLatency = 0.5; //some middle ground
         rx_streams[i].isTx = false; //RX channel
-        rx_streams[i].dataFmt = lms_stream_t::LMS_FMT_I12; //12-bit integers
+        rx_streams[i].dataFmt = lms_stream_t::LMS_FMT_I16; //12-bit integers
         if (LMS_SetupStream(device, &rx_streams[i]) != 0)
             error();
-        tx_streams[i].channel = i; //channel number
+        tx_streams[i].channel = 2*i; //channel number
         tx_streams[i].fifoSize = 1024 * 1024; //fifo size in samples
         tx_streams[i].throughputVsLatency = 0.5; //some middle ground
         tx_streams[i].isTx = true; //TX channel
-        tx_streams[i].dataFmt = lms_stream_t::LMS_FMT_I12; //12-bit integers
+        tx_streams[i].dataFmt = lms_stream_t::LMS_FMT_I16; //12-bit integers
         if (LMS_SetupStream(device, &tx_streams[i]) != 0)
             error();
     }
@@ -147,16 +150,13 @@ int main(int argc, char** argv)
 
     lms_stream_meta_t tx_metadata; //Use metadata for additional control over sample send function behavior
     tx_metadata.flushPartialPacket = false; //do not force sending of incomplete packet
-    tx_metadata.waitForTimestamp = true; //Enable synchronization to HW timestamp
+    tx_metadata.waitForTimestamp = false; //Enable synchronization to HW timestamp
 
-#ifdef USE_GNU_PLOT
-    GNUPlotPipe gp;
-    gp.write("set size square\n set xrange[-2050:2050]\n set yrange[-2050:2050]\n");
-#endif
+
     auto t1 = chrono::high_resolution_clock::now();
     auto t2 = t1;
 
-    while (chrono::high_resolution_clock::now() - t1 < chrono::seconds(10)) //run for 10 seconds
+    while (chrono::high_resolution_clock::now() - t1 < chrono::seconds(100)) //run for 10 seconds
     {
         for (int i = 0; i < chCount; ++i)
         {
@@ -164,27 +164,16 @@ int main(int argc, char** argv)
             //Receive samples
             samplesRead = LMS_RecvStream(&rx_streams[i], buffers[i], bufersize, &rx_metadata, 1000);
             //Send samples with 1024*256 sample delay from RX (waitForTimestamp is enabled)
-            tx_metadata.timestamp = rx_metadata.timestamp + 1024 * 256;
+            tx_metadata.timestamp = 0;//rx_metadata.timestamp + 1024 * 256;
             LMS_SendStream(&tx_streams[i], buffers[i], samplesRead, &tx_metadata, 1000);
         }
 
+#if 0
         //Print stats every 1s
         if (chrono::high_resolution_clock::now() - t2 > chrono::seconds(1))
         {
             t2 = chrono::high_resolution_clock::now();
-#ifdef USE_GNU_PLOT
-            //Plot samples
-            gp.write("plot '-' with points title 'ch 0'");
-            for (int i = 1; i < chCount; ++i)
-                gp.write(", '-' with points title 'ch 1'\n");
-            for (int i = 0; i < chCount; ++i)
-            {
-                for (uint32_t j = 0; j < bufersize / 8; ++j)
-                    gp.writef("%i %i\n", buffers[i][2 * j], buffers[i][2 * j + 1]);
-                gp.write("e\n");
-                gp.flush();
-            }
-#endif
+
             //Print stats
             lms_stream_status_t status;
             LMS_GetStreamStatus(rx_streams, &status); //Obtain RX stream stats
@@ -195,6 +184,7 @@ int main(int argc, char** argv)
             cout << "TX rate: " << status.linkRate / 1e6 << " MB/s\n"; //link data rate (both channels))
             cout << "TX 0 FIFO: " << 100 * status.fifoFilledCount / status.fifoSize << "%" << endl; //percentage of TX 0 fifo filled
         }
+#endif
     }
 
     //Stop streaming
