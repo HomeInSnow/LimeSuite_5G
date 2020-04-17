@@ -10,7 +10,7 @@ namespace lime{
 class ConnectionLitePCIe : public LMS64CProtocol
 {
 public:
-    ConnectionLitePCIe(const char* control_ep);
+    ConnectionLitePCIe(const std::string device_addr);
     ~ConnectionLitePCIe(void);
 
     bool IsOpen();
@@ -36,7 +36,17 @@ protected:
     void AbortSending(int epIndex) override;
     
 private:
+    friend class ConnectionLitePCIeEntry;
+
     static const int MAX_EP_CNT = 3;
+    static const int MAX_DEV_CNT = 4;
+    struct EPConfig
+    {
+        std::string control_name;
+        std::string rd_ep_name[MAX_EP_CNT];
+        std::string wr_ep_name[MAX_EP_CNT];
+    } deviceConfig;
+
     int control_fd;
     int rd_ep_fd[MAX_EP_CNT];
     int wr_ep_fd[MAX_EP_CNT];

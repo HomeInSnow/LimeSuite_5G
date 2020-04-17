@@ -7,13 +7,11 @@ using namespace std;
 
 using namespace lime;
 
-static const char* rd_ep_names[] = { "/dev/litepcie_read0",  "/dev/litepcie_read1",  "/dev/litepcie_read2"};
-static const char* wr_ep_names[] = { "/dev/litepcie_write0",  "/dev/litepcie_write1",  "/dev/litepcie_write2"};
-
-ConnectionLitePCIe::ConnectionLitePCIe(const char* control_ep) :
+ConnectionLitePCIe::ConnectionLitePCIe(const std::string device_addr) :
     isConnected(true)
 {
-    control_fd = open(control_ep, O_RDWR);
+    deviceConfig.control_name = device_addr + "_control";
+    control_fd = open(deviceConfig.control_name.c_str(), O_RDWR);
     if (control_fd<0)
     {
         isConnected = false;
@@ -21,7 +19,11 @@ ConnectionLitePCIe::ConnectionLitePCIe(const char* control_ep) :
         return;
     }
     for (int i = 0; i < MAX_EP_CNT; i++)
+    {
+        deviceConfig.rd_ep_name[i] = device_addr + "_read" + std::to_string(i);
+        deviceConfig.wr_ep_name[i] = device_addr + "_write" + std::to_string(i);
         rd_ep_fd[i] = wr_ep_fd[i] = -1;
+    }
 }
 
 ConnectionLitePCIe::~ConnectionLitePCIe()
@@ -73,7 +75,7 @@ int ConnectionLitePCIe::ReceiveData(char *buffer, int length, int epIndex, int t
 {
     if (rd_ep_fd[epIndex] == -1)
     {
-       if ((rd_ep_fd[epIndex] = open(rd_ep_names[epIndex], O_RDONLY | O_NOCTTY | O_NONBLOCK))==-1)
+       if ((rd_ep_fd[epIndex] = open(deviceConfig.rd_ep_name[epIndex].c_str(), O_RDONLY | O_NOCTTY | O_NONBLOCK))==-1)
        {
             lime::error("open read endpoint failed");
             return 0;
@@ -117,7 +119,7 @@ int ConnectionLitePCIe::SendData(const char *buffer, int length, int epIndex, in
 {
     if (wr_ep_fd[epIndex] == -1)
     {
-       if ((wr_ep_fd[epIndex] = open(wr_ep_names[epIndex], O_WRONLY | O_NOCTTY | O_NONBLOCK))==-1)
+       if ((wr_ep_fd[epIndex] = open(deviceConfig.wr_ep_name[epIndex].c_str(), O_WRONLY | O_NOCTTY | O_NONBLOCK))==-1)
        {
             lime::error("open write endpoint failed");
             return 0;
