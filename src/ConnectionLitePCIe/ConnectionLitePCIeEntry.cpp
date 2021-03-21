@@ -1,15 +1,10 @@
-/**
-    @file ConnectionSTREAMEntry.cpp
-    @author Lime Microsystems
-    @brief Implementation of STREAM board connection.
-*/
 #ifdef __unix__
 #include <unistd.h>
 #endif
 #include "ConnectionLitePCIe.h"
 using namespace lime;
 #include <fstream>
-
+#include <map>
 //! make a static-initialized entry in the registry
 void __loadConnectionLitePCIeEntry(void) //TODO fixme replace with LoadLibrary/dlopen
 {
@@ -30,31 +25,37 @@ std::vector<ConnectionHandle> ConnectionLitePCIeEntry::enumerate(const Connectio
     std::vector<ConnectionHandle> handles;
     ConnectionHandle handle;
     handle.media = "PCI-E";
-    int n_qpcie = 0;
-    int n_pcie = 0;
-    for(int i = 0; i < ConnectionLitePCIe::MAX_DEV_CNT; i++)
+    
+    std::vector<std::string> LimePCIePorts;
+    FILE *lsPipe;
+    lsPipe = popen("ls /dev/Lime*_control -d -1", "r");
+    char tempBuffer[512];
+    while(fscanf(lsPipe, "%s", tempBuffer) == 1)
+        LimePCIePorts.push_back(tempBuffer);
+    pclose(lsPipe);
+
+    std::map<std::string, std::string> port_name_map = {
+        {"Lime5GRadio", "LimeSDR-5GRadio"},
+        {"LimeQPCIe", "LimeSDR-QPCIe"},
+        {"LimePCIe", "LimeSDR-PCIe"}
+    };
+
+    for(auto port:LimePCIePorts)
     {
-        std::string device_addr = "/dev/litepcie" + std::to_string(i);
-        std::string control_name = device_addr + "_control";
-        if(access(control_name.c_str(), F_OK ) != -1 )
+        if(access(port.c_str(), F_OK ) != -1 )
         {
-            if (hint.index < 0 || hint.index == i)
+            for (auto port_name:port_name_map)
             {
-                std::string ep = device_addr + "_read2";
-                if(access(ep.c_str(), F_OK) != -1)
+                size_t pos = port.find(port_name.first);
+                if(pos != std::string::npos)
                 {
-                    handle.name = "LimeSDR-QPCIe" + ((n_qpcie>0) ? " (" + std::to_string(n_qpcie) + ")" : "");
-                    n_qpcie++;
+                    std::string dev_nr(&port[pos+port_name.first.length()], &port[port.find("_")]);
+                    handle.name = port_name.second + (dev_nr == "0" ? "" : " (" + dev_nr + ")");
                 }
-                else
-                {
-                    handle.name = "LimeSDR-PCIe" + ((n_pcie>0) ? " (" + std::to_string(n_pcie) + ")" : "");
-                    n_pcie++;
-                }
-                handle.index = i;
-                handle.addr = device_addr;
-                handles.push_back(handle);
             }
+            handle.index++;
+            handle.addr = port.substr(0, port.find("_"));
+            handles.push_back(handle);
         }
     }
     return handles;

@@ -173,10 +173,5 @@ int FPGA_Q::SetInterfaceFreq(double txRate_Hz, double rxRate_Hz, int channel)
     }
     return status;
 }
-
-
 */
-
-
-
 } //namespace lime

@@ -39,7 +39,6 @@ private:
     friend class ConnectionLitePCIeEntry;
 
     static const int MAX_EP_CNT = 3;
-    static const int MAX_DEV_CNT = 4;
     struct EPConfig
     {
         std::string control_name;
