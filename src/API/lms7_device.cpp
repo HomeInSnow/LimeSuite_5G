@@ -13,6 +13,7 @@
 #include "LimeSDR.h"
 #include "LimeSDR_PCIE.h"
 #include "LimeSDR_Core.h"
+#include "LimeSDR_5GRadio.h"
 #include "GFIR/lms_gfir.h"
 #include "IConnection.h"
 #include "dataTypes.h"
@@ -56,7 +57,8 @@ LMS7_Device* LMS7_Device::CreateDevice(const lime::ConnectionHandle& handle, LMS
     if (info.deviceName ==  lime::GetDeviceName(lime::LMS_DEV_LIMESDRMINI))
         device = new LMS7_LimeSDR_mini(conn,obj);
     else if (info.deviceName == lime::GetDeviceName(lime::LMS_DEV_LIMESDR_QPCIE))
-        device = new LMS7_qLimeSDR(conn,obj);
+        //device = new LMS7_qLimeSDR(conn,obj); //FIXME: Return this to qLimeSDR after GW change
+        device = new LMS7_LimeSDR_5GRadio(conn, obj);
     else if (info.deviceName == lime::GetDeviceName(lime::LMS_DEV_LIMESDR_PCIE))
         device = new LMS7_LimeSDR_PCIE(conn,obj);
     else if (info.deviceName == lime::GetDeviceName(lime::LMS_DEV_LIMENET_MICRO))
@@ -64,10 +66,7 @@ LMS7_Device* LMS7_Device::CreateDevice(const lime::ConnectionHandle& handle, LMS
     else if (info.deviceName == lime::GetDeviceName(lime::LMS_DEV_LIMESDR_CORE_SDR))
         device = new LMS7_CoreSDR(conn,obj);
     else if (info.deviceName == lime::GetDeviceName(lime::LMS_DEV_LIMESDR_5GRADIO))
-    {
-        lime::log(LogLevel::LOG_LEVEL_INFO, "Creating fake LimeSDR_5GRadio board");
-        device = new LMS7_qLimeSDR(conn,obj);
-    }
+        device = new LMS7_LimeSDR_5GRadio(conn,obj);
     else if (info.deviceName != lime::GetDeviceName(lime::LMS_DEV_UNKNOWN))
         device = new LMS7_LimeSDR(conn,obj);
     else
