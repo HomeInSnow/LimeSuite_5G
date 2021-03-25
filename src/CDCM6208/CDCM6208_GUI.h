@@ -24,7 +24,7 @@ class CDCM6208_panelgui;
 #include <wx/sizer.h>
 #include <wx/frame.h>
 #include <wx/stattext.h>
-#include <wx/spinctrl.h>
+#include <wx/textctrl.h>
 #include <wx/radiobut.h>
 #include <wx/choice.h>
 #include <wx/statbox.h>
@@ -47,7 +47,7 @@ class CDCM6208_CONTROL : public wxFrame
 	public:
 		CDCM6208_panelgui* m_CDCM1;
 
-		CDCM6208_CONTROL( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
+		CDCM6208_CONTROL( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("CDCM6208"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL, const wxString& name = wxT("CDCM6208") );
 
 		~CDCM6208_CONTROL();
 
@@ -62,18 +62,18 @@ class CDCM_controlpanel : public wxPanel
 
 	protected:
 		wxStaticText* m_staticText1;
-		wxSpinCtrlDouble* m_PrimaryF;
+		wxTextCtrl* m_PrimaryFreq;
 		wxStaticText* m_staticText2;
-		wxSpinCtrlDouble* m_SecondaryF;
+		wxTextCtrl* m_SecondaryFreq;
 		wxStaticText* m_staticText3;
-		wxSpinCtrl* m_RDivider;
+		wxTextCtrl* m_RDivider;
 		wxStaticText* m_staticText4;
 		wxRadioButton* m_PrimarySel;
 		wxRadioButton* m_SecondarySel;
 		wxStaticText* m_staticText5;
-		wxSpinCtrlDouble* m_MDivider;
+		wxTextCtrl* m_MDivider;
 		wxStaticText* m_staticText6;
-		wxSpinCtrlDouble* m_NMultiplier;
+		wxTextCtrl* m_NMultiplier;
 		wxStaticText* m_staticText7;
 		wxStaticText* m_VCOFREQ;
 		wxStaticText* m_staticText9;
@@ -85,35 +85,43 @@ class CDCM_controlpanel : public wxPanel
 		wxStaticText* m_staticText51;
 		wxStaticText* m_VCORANGE;
 		wxStaticText* m_staticText26;
-		wxSpinCtrl* m_spinCtrl4;
+		wxTextCtrl* m_Baseaddr;
 		wxStaticText* m_staticText27;
 		wxStaticText* m_LockStatus;
 		wxButton* m_WriteAll;
 		wxButton* m_ReadAll;
 		wxStaticText* m_staticText20;
 		wxStaticText* m_staticText21;
-		wxSpinCtrl* m_spinCtrl2;
-		wxSpinCtrlDouble* m_spinCtrlDouble7;
+		wxTextCtrl* m_Y2Y3_DIV;
+		wxTextCtrl* m_Y2Y3_FREQ;
 		wxStaticText* m_staticText38;
 		wxStaticText* m_staticText39;
-		wxSpinCtrlDouble* m_spinCtrlDouble8;
-		wxSpinCtrlDouble* m_spinCtrlDouble9;
+		wxTextCtrl* m_Y6_DIV;
+		wxTextCtrl* m_Y6_FREQ;
 		wxStaticText* m_staticText24;
 		wxStaticText* m_staticText25;
-		wxSpinCtrlDouble* m_spinCtrlDouble13;
-		wxSpinCtrlDouble* m_spinCtrlDouble14;
+		wxTextCtrl* m_Y7_DIV;
+		wxTextCtrl* m_Y7_FREQ;
 		wxStaticText* m_staticText40;
 		wxStaticText* m_staticText41;
-		wxSpinCtrl* m_spinCtrl3;
-		wxSpinCtrlDouble* m_spinCtrlDouble10;
+		wxTextCtrl* m_Y0Y1_DIV;
+		wxTextCtrl* m_Y0Y1_FREQ;
 		wxStaticText* m_staticText44;
 		wxStaticText* m_staticText45;
-		wxSpinCtrlDouble* m_spinCtrlDouble11;
-		wxSpinCtrlDouble* m_spinCtrlDouble12;
+		wxTextCtrl* m_Y4_DIV;
+		wxTextCtrl* m_Y4_FREQ;
 		wxStaticText* m_staticText441;
 		wxStaticText* m_staticText451;
-		wxSpinCtrlDouble* m_spinCtrlDouble111;
-		wxSpinCtrlDouble* m_spinCtrlDouble121;
+		wxTextCtrl* m_Y5_DIV;
+		wxTextCtrl* m_Y5_FREQ;
+
+		// Virtual event handlers, override them in your derived class
+		virtual void OnChange( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnRadio( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnChoice( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnButton( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnFreqEntry( wxCommandEvent& event ) { event.Skip(); }
+
 
 	public:
 

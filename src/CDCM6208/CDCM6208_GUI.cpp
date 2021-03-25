@@ -11,7 +11,7 @@
 
 ///////////////////////////////////////////////////////////////////////////
 
-CDCM6208_CONTROL::CDCM6208_CONTROL( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxFrame( parent, id, title, pos, size, style )
+CDCM6208_CONTROL::CDCM6208_CONTROL( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) : wxFrame( parent, id, title, pos, size, style, name )
 {
 	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
 
@@ -27,7 +27,7 @@ CDCM6208_CONTROL::CDCM6208_CONTROL( wxWindow* parent, wxWindowID id, const wxStr
 	fgSizer2->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 
 	m_CDCMtabs = new wxNotebook( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
-	m_CDCMtabs->SetMinSize( wxSize( 1250,-1 ) );
+	m_CDCMtabs->SetMinSize( wxSize( 1450,-1 ) );
 
 	m_CDCM1 = new CDCM6208_panelgui( m_CDCMtabs, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	m_CDCMtabs->AddPage( m_CDCM1, wxT("CDCM1"), false );
@@ -78,17 +78,15 @@ CDCM_controlpanel::CDCM_controlpanel( wxWindow* parent, wxWindowID id, const wxP
 	m_staticText1->Wrap( -1 );
 	bSizer3->Add( m_staticText1, 0, wxALL, 5 );
 
-	m_PrimaryF = new wxSpinCtrlDouble( VCO_Settings->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100, 0, 1 );
-	m_PrimaryF->SetDigits( 0 );
-	bSizer3->Add( m_PrimaryF, 0, wxALL, 5 );
+	m_PrimaryFreq = new wxTextCtrl( VCO_Settings->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer3->Add( m_PrimaryFreq, 0, wxALL, 5 );
 
 	m_staticText2 = new wxStaticText( VCO_Settings->GetStaticBox(), wxID_ANY, wxT("Secondary Input Frequency"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText2->Wrap( -1 );
 	bSizer3->Add( m_staticText2, 0, wxALL, 5 );
 
-	m_SecondaryF = new wxSpinCtrlDouble( VCO_Settings->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100, 0, 1 );
-	m_SecondaryF->SetDigits( 0 );
-	bSizer3->Add( m_SecondaryF, 0, wxALL, 5 );
+	m_SecondaryFreq = new wxTextCtrl( VCO_Settings->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer3->Add( m_SecondaryFreq, 0, wxALL, 5 );
 
 
 	fgSizer6->Add( bSizer3, 1, wxEXPAND|wxLEFT|wxRIGHT, 5 );
@@ -100,7 +98,7 @@ CDCM_controlpanel::CDCM_controlpanel( wxWindow* parent, wxWindowID id, const wxP
 	m_staticText3->Wrap( -1 );
 	bSizer4->Add( m_staticText3, 0, wxALL, 5 );
 
-	m_RDivider = new wxSpinCtrl( VCO_Settings->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 10, 0 );
+	m_RDivider = new wxTextCtrl( VCO_Settings->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer4->Add( m_RDivider, 0, wxALL, 5 );
 
 
@@ -129,16 +127,14 @@ CDCM_controlpanel::CDCM_controlpanel( wxWindow* parent, wxWindowID id, const wxP
 	m_staticText5->Wrap( -1 );
 	bSizer6->Add( m_staticText5, 0, wxALL, 5 );
 
-	m_MDivider = new wxSpinCtrlDouble( VCO_Settings->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100, 0, 1 );
-	m_MDivider->SetDigits( 0 );
+	m_MDivider = new wxTextCtrl( VCO_Settings->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer6->Add( m_MDivider, 0, wxALL, 5 );
 
 	m_staticText6 = new wxStaticText( VCO_Settings->GetStaticBox(), wxID_ANY, wxT("N multiplier"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText6->Wrap( -1 );
 	bSizer6->Add( m_staticText6, 0, wxALL, 5 );
 
-	m_NMultiplier = new wxSpinCtrlDouble( VCO_Settings->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100, 0, 1 );
-	m_NMultiplier->SetDigits( 0 );
+	m_NMultiplier = new wxTextCtrl( VCO_Settings->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer6->Add( m_NMultiplier, 0, wxALL, 5 );
 
 
@@ -235,8 +231,8 @@ CDCM_controlpanel::CDCM_controlpanel( wxWindow* parent, wxWindowID id, const wxP
 	m_staticText26->Wrap( -1 );
 	bSizer9->Add( m_staticText26, 0, wxALL, 5 );
 
-	m_spinCtrl4 = new wxSpinCtrl( Misc->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 10, 0 );
-	bSizer9->Add( m_spinCtrl4, 0, wxALL, 5 );
+	m_Baseaddr = new wxTextCtrl( Misc->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer9->Add( m_Baseaddr, 0, wxALL, 5 );
 
 
 	fgSizer12->Add( bSizer9, 1, wxEXPAND, 5 );
@@ -289,7 +285,7 @@ CDCM_controlpanel::CDCM_controlpanel( wxWindow* parent, wxWindowID id, const wxP
 	Master->Add( Left_Column, 1, wxEXPAND, 5 );
 
 	wxFlexGridSizer* Right_Column;
-	Right_Column = new wxFlexGridSizer( 0, 1, 0, 0 );
+	Right_Column = new wxFlexGridSizer( 0, 2, 0, 0 );
 	Right_Column->SetFlexibleDirection( wxBOTH );
 	Right_Column->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 
@@ -315,12 +311,11 @@ CDCM_controlpanel::CDCM_controlpanel( wxWindow* parent, wxWindowID id, const wxP
 	m_staticText21->Wrap( -1 );
 	gSizer1->Add( m_staticText21, 0, wxALL, 5 );
 
-	m_spinCtrl2 = new wxSpinCtrl( Y2_Y3->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 10, 0 );
-	gSizer1->Add( m_spinCtrl2, 0, wxALL, 5 );
+	m_Y2Y3_DIV = new wxTextCtrl( Y2_Y3->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	gSizer1->Add( m_Y2Y3_DIV, 0, wxALL, 5 );
 
-	m_spinCtrlDouble7 = new wxSpinCtrlDouble( Y2_Y3->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100, 0, 1 );
-	m_spinCtrlDouble7->SetDigits( 0 );
-	gSizer1->Add( m_spinCtrlDouble7, 0, wxALL, 5 );
+	m_Y2Y3_FREQ = new wxTextCtrl( Y2_Y3->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	gSizer1->Add( m_Y2Y3_FREQ, 0, wxALL, 5 );
 
 
 	Y2_Y3->Add( gSizer1, 1, wxEXPAND, 5 );
@@ -342,13 +337,11 @@ CDCM_controlpanel::CDCM_controlpanel( wxWindow* parent, wxWindowID id, const wxP
 	m_staticText39->Wrap( -1 );
 	gSizer2->Add( m_staticText39, 0, wxALL, 5 );
 
-	m_spinCtrlDouble8 = new wxSpinCtrlDouble( Y6->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100, 0, 1 );
-	m_spinCtrlDouble8->SetDigits( 0 );
-	gSizer2->Add( m_spinCtrlDouble8, 0, wxALL, 5 );
+	m_Y6_DIV = new wxTextCtrl( Y6->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	gSizer2->Add( m_Y6_DIV, 0, wxALL, 5 );
 
-	m_spinCtrlDouble9 = new wxSpinCtrlDouble( Y6->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100, 0, 1 );
-	m_spinCtrlDouble9->SetDigits( 0 );
-	gSizer2->Add( m_spinCtrlDouble9, 0, wxALL, 5 );
+	m_Y6_FREQ = new wxTextCtrl( Y6->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	gSizer2->Add( m_Y6_FREQ, 0, wxALL, 5 );
 
 
 	Y6->Add( gSizer2, 1, wxEXPAND, 5 );
@@ -370,13 +363,11 @@ CDCM_controlpanel::CDCM_controlpanel( wxWindow* parent, wxWindowID id, const wxP
 	m_staticText25->Wrap( -1 );
 	gSizer6->Add( m_staticText25, 0, wxALL, 5 );
 
-	m_spinCtrlDouble13 = new wxSpinCtrlDouble( Y7->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100, 0, 1 );
-	m_spinCtrlDouble13->SetDigits( 0 );
-	gSizer6->Add( m_spinCtrlDouble13, 0, wxALL, 5 );
+	m_Y7_DIV = new wxTextCtrl( Y7->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	gSizer6->Add( m_Y7_DIV, 0, wxALL, 5 );
 
-	m_spinCtrlDouble14 = new wxSpinCtrlDouble( Y7->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100, 0, 1 );
-	m_spinCtrlDouble14->SetDigits( 0 );
-	gSizer6->Add( m_spinCtrlDouble14, 0, wxALL, 5 );
+	m_Y7_FREQ = new wxTextCtrl( Y7->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	gSizer6->Add( m_Y7_FREQ, 0, wxALL, 5 );
 
 
 	Y7->Add( gSizer6, 1, wxEXPAND, 5 );
@@ -412,12 +403,11 @@ CDCM_controlpanel::CDCM_controlpanel( wxWindow* parent, wxWindowID id, const wxP
 	m_staticText41->Wrap( -1 );
 	gSizer3->Add( m_staticText41, 0, wxALL, 5 );
 
-	m_spinCtrl3 = new wxSpinCtrl( Y0_Y1->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 10, 0 );
-	gSizer3->Add( m_spinCtrl3, 0, wxALL, 5 );
+	m_Y0Y1_DIV = new wxTextCtrl( Y0_Y1->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	gSizer3->Add( m_Y0Y1_DIV, 0, wxALL, 5 );
 
-	m_spinCtrlDouble10 = new wxSpinCtrlDouble( Y0_Y1->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100, 0, 1 );
-	m_spinCtrlDouble10->SetDigits( 0 );
-	gSizer3->Add( m_spinCtrlDouble10, 0, wxALL, 5 );
+	m_Y0Y1_FREQ = new wxTextCtrl( Y0_Y1->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	gSizer3->Add( m_Y0Y1_FREQ, 0, wxALL, 5 );
 
 
 	Y0_Y1->Add( gSizer3, 1, wxEXPAND, 5 );
@@ -439,13 +429,11 @@ CDCM_controlpanel::CDCM_controlpanel( wxWindow* parent, wxWindowID id, const wxP
 	m_staticText45->Wrap( -1 );
 	gSizer4->Add( m_staticText45, 0, wxALL, 5 );
 
-	m_spinCtrlDouble11 = new wxSpinCtrlDouble( Y4->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100, 0, 1 );
-	m_spinCtrlDouble11->SetDigits( 0 );
-	gSizer4->Add( m_spinCtrlDouble11, 0, wxALL, 5 );
+	m_Y4_DIV = new wxTextCtrl( Y4->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	gSizer4->Add( m_Y4_DIV, 0, wxALL, 5 );
 
-	m_spinCtrlDouble12 = new wxSpinCtrlDouble( Y4->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100, 0, 1 );
-	m_spinCtrlDouble12->SetDigits( 0 );
-	gSizer4->Add( m_spinCtrlDouble12, 0, wxALL, 5 );
+	m_Y4_FREQ = new wxTextCtrl( Y4->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	gSizer4->Add( m_Y4_FREQ, 0, wxALL, 5 );
 
 
 	Y4->Add( gSizer4, 1, wxEXPAND, 5 );
@@ -467,13 +455,11 @@ CDCM_controlpanel::CDCM_controlpanel( wxWindow* parent, wxWindowID id, const wxP
 	m_staticText451->Wrap( -1 );
 	gSizer41->Add( m_staticText451, 0, wxALL, 5 );
 
-	m_spinCtrlDouble111 = new wxSpinCtrlDouble( Y5->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100, 0, 1 );
-	m_spinCtrlDouble111->SetDigits( 0 );
-	gSizer41->Add( m_spinCtrlDouble111, 0, wxALL, 5 );
+	m_Y5_DIV = new wxTextCtrl( Y5->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	gSizer41->Add( m_Y5_DIV, 0, wxALL, 5 );
 
-	m_spinCtrlDouble121 = new wxSpinCtrlDouble( Y5->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100, 0, 1 );
-	m_spinCtrlDouble121->SetDigits( 0 );
-	gSizer41->Add( m_spinCtrlDouble121, 0, wxALL, 5 );
+	m_Y5_FREQ = new wxTextCtrl( Y5->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	gSizer41->Add( m_Y5_FREQ, 0, wxALL, 5 );
 
 
 	Y5->Add( gSizer41, 1, wxEXPAND, 5 );
@@ -494,8 +480,60 @@ CDCM_controlpanel::CDCM_controlpanel( wxWindow* parent, wxWindowID id, const wxP
 	this->SetSizer( Master );
 	this->Layout();
 	Master->Fit( this );
+
+	// Connect Events
+	m_PrimaryFreq->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_SecondaryFreq->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_RDivider->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_PrimarySel->Connect( wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( CDCM_controlpanel::OnRadio ), NULL, this );
+	m_SecondarySel->Connect( wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( CDCM_controlpanel::OnRadio ), NULL, this );
+	m_MDivider->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_NMultiplier->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_PSB->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( CDCM_controlpanel::OnChoice ), NULL, this );
+	m_PSA->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( CDCM_controlpanel::OnChoice ), NULL, this );
+	m_CDCM_VER->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( CDCM_controlpanel::OnChoice ), NULL, this );
+	m_WriteAll->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( CDCM_controlpanel::OnButton ), NULL, this );
+	m_ReadAll->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( CDCM_controlpanel::OnButton ), NULL, this );
+	m_Y2Y3_DIV->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_Y2Y3_FREQ->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnFreqEntry ), NULL, this );
+	m_Y6_DIV->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_Y6_FREQ->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnFreqEntry ), NULL, this );
+	m_Y7_DIV->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_Y7_FREQ->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnFreqEntry ), NULL, this );
+	m_Y0Y1_DIV->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_Y0Y1_FREQ->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnFreqEntry ), NULL, this );
+	m_Y4_DIV->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_Y4_FREQ->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnFreqEntry ), NULL, this );
+	m_Y5_DIV->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_Y5_FREQ->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnFreqEntry ), NULL, this );
 }
 
 CDCM_controlpanel::~CDCM_controlpanel()
 {
+	// Disconnect Events
+	m_PrimaryFreq->Disconnect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_SecondaryFreq->Disconnect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_RDivider->Disconnect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_PrimarySel->Disconnect( wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( CDCM_controlpanel::OnRadio ), NULL, this );
+	m_SecondarySel->Disconnect( wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( CDCM_controlpanel::OnRadio ), NULL, this );
+	m_MDivider->Disconnect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_NMultiplier->Disconnect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_PSB->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( CDCM_controlpanel::OnChoice ), NULL, this );
+	m_PSA->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( CDCM_controlpanel::OnChoice ), NULL, this );
+	m_CDCM_VER->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( CDCM_controlpanel::OnChoice ), NULL, this );
+	m_WriteAll->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( CDCM_controlpanel::OnButton ), NULL, this );
+	m_ReadAll->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( CDCM_controlpanel::OnButton ), NULL, this );
+	m_Y2Y3_DIV->Disconnect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_Y2Y3_FREQ->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnFreqEntry ), NULL, this );
+	m_Y6_DIV->Disconnect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_Y6_FREQ->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnFreqEntry ), NULL, this );
+	m_Y7_DIV->Disconnect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_Y7_FREQ->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnFreqEntry ), NULL, this );
+	m_Y0Y1_DIV->Disconnect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_Y0Y1_FREQ->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnFreqEntry ), NULL, this );
+	m_Y4_DIV->Disconnect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_Y4_FREQ->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnFreqEntry ), NULL, this );
+	m_Y5_DIV->Disconnect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_Y5_FREQ->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnFreqEntry ), NULL, this );
+
 }

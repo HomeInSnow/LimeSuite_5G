@@ -13,3 +13,33 @@ CDCM_controlpanel(parent, id, pos, size, style), lmsControl(nullptr)
 {
 
 }
+
+void CDCM6208_panelgui::OnChange( wxCommandEvent& event )
+{
+
+}
+
+void CDCM6208_panelgui::OnRadio( wxCommandEvent& event )
+{
+
+}
+
+void CDCM6208_panelgui::OnChoice( wxCommandEvent& event )
+{
+
+}
+
+void CDCM6208_panelgui::OnFreqEntry( wxCommandEvent& event )
+{
+
+}
+
+void CDCM6208_panelgui::Recalculate()
+{
+
+}
+
+void CDCM6208_panelgui::OnButton( wxCommandEvent& event )
+{
+
+}
