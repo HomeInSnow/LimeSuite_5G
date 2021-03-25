@@ -224,7 +224,6 @@ set(LMS7SUITE_GUI_SOURCES
     CDCM6208/CDCM6208_GUI.cpp
     CDCM6208/CDCM6208.cpp
     CDCM6208/CDCM6208_panelgui.cpp
-    CDCM6208/CDCM_Structure.bmp
     boards_wxgui/RFSpark_wxgui.cpp
     Si5351C/Si5351C_wxgui.cpp
     lms7suiteApp_gui.cpp
