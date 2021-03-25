@@ -42,10 +42,10 @@ class CDCM6208_CONTROL : public wxFrame
 
 	protected:
 		wxNotebook* m_CDCMtabs;
-		CDCM6208_panelgui* m_CDCM2;
 
 	public:
 		CDCM6208_panelgui* m_CDCM1;
+		CDCM6208_panelgui* m_CDCM2;
 
 		CDCM6208_CONTROL( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("CDCM6208"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL, const wxString& name = wxT("CDCM6208") );
 

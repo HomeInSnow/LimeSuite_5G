@@ -78,14 +78,30 @@ CDCM_controlpanel::CDCM_controlpanel( wxWindow* parent, wxWindowID id, const wxP
 	m_staticText1->Wrap( -1 );
 	bSizer3->Add( m_staticText1, 0, wxALL, 5 );
 
-	m_PrimaryFreq = new wxTextCtrl( VCO_Settings->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	m_PrimaryFreq = new wxTextCtrl( VCO_Settings->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
+	#ifdef __WXGTK__
+	if ( !m_PrimaryFreq->HasFlag( wxTE_MULTILINE ) )
+	{
+	m_PrimaryFreq->SetMaxLength( 7 );
+	}
+	#else
+	m_PrimaryFreq->SetMaxLength( 7 );
+	#endif
 	bSizer3->Add( m_PrimaryFreq, 0, wxALL, 5 );
 
 	m_staticText2 = new wxStaticText( VCO_Settings->GetStaticBox(), wxID_ANY, wxT("Secondary Input Frequency"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText2->Wrap( -1 );
 	bSizer3->Add( m_staticText2, 0, wxALL, 5 );
 
-	m_SecondaryFreq = new wxTextCtrl( VCO_Settings->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	m_SecondaryFreq = new wxTextCtrl( VCO_Settings->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
+	#ifdef __WXGTK__
+	if ( !m_SecondaryFreq->HasFlag( wxTE_MULTILINE ) )
+	{
+	m_SecondaryFreq->SetMaxLength( 7 );
+	}
+	#else
+	m_SecondaryFreq->SetMaxLength( 7 );
+	#endif
 	bSizer3->Add( m_SecondaryFreq, 0, wxALL, 5 );
 
 
@@ -98,7 +114,15 @@ CDCM_controlpanel::CDCM_controlpanel( wxWindow* parent, wxWindowID id, const wxP
 	m_staticText3->Wrap( -1 );
 	bSizer4->Add( m_staticText3, 0, wxALL, 5 );
 
-	m_RDivider = new wxTextCtrl( VCO_Settings->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	m_RDivider = new wxTextCtrl( VCO_Settings->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
+	#ifdef __WXGTK__
+	if ( !m_RDivider->HasFlag( wxTE_MULTILINE ) )
+	{
+	m_RDivider->SetMaxLength( 7 );
+	}
+	#else
+	m_RDivider->SetMaxLength( 7 );
+	#endif
 	bSizer4->Add( m_RDivider, 0, wxALL, 5 );
 
 
@@ -127,14 +151,30 @@ CDCM_controlpanel::CDCM_controlpanel( wxWindow* parent, wxWindowID id, const wxP
 	m_staticText5->Wrap( -1 );
 	bSizer6->Add( m_staticText5, 0, wxALL, 5 );
 
-	m_MDivider = new wxTextCtrl( VCO_Settings->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	m_MDivider = new wxTextCtrl( VCO_Settings->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
+	#ifdef __WXGTK__
+	if ( !m_MDivider->HasFlag( wxTE_MULTILINE ) )
+	{
+	m_MDivider->SetMaxLength( 7 );
+	}
+	#else
+	m_MDivider->SetMaxLength( 7 );
+	#endif
 	bSizer6->Add( m_MDivider, 0, wxALL, 5 );
 
 	m_staticText6 = new wxStaticText( VCO_Settings->GetStaticBox(), wxID_ANY, wxT("N multiplier"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText6->Wrap( -1 );
 	bSizer6->Add( m_staticText6, 0, wxALL, 5 );
 
-	m_NMultiplier = new wxTextCtrl( VCO_Settings->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	m_NMultiplier = new wxTextCtrl( VCO_Settings->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
+	#ifdef __WXGTK__
+	if ( !m_NMultiplier->HasFlag( wxTE_MULTILINE ) )
+	{
+	m_NMultiplier->SetMaxLength( 7 );
+	}
+	#else
+	m_NMultiplier->SetMaxLength( 7 );
+	#endif
 	bSizer6->Add( m_NMultiplier, 0, wxALL, 5 );
 
 
@@ -143,6 +183,7 @@ CDCM_controlpanel::CDCM_controlpanel( wxWindow* parent, wxWindowID id, const wxP
 	wxBoxSizer* bSizer7;
 	bSizer7 = new wxBoxSizer( wxVERTICAL );
 
+	bSizer7->SetMinSize( wxSize( 150,-1 ) );
 	m_staticText7 = new wxStaticText( VCO_Settings->GetStaticBox(), wxID_ANY, wxT("VCO Freq"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText7->Wrap( -1 );
 	bSizer7->Add( m_staticText7, 0, wxALL, 5 );
@@ -171,7 +212,7 @@ CDCM_controlpanel::CDCM_controlpanel( wxWindow* parent, wxWindowID id, const wxP
 	m_staticText10->Wrap( -1 );
 	bSizer8->Add( m_staticText10, 0, wxALL, 5 );
 
-	wxString m_PSAChoices[] = { wxT("4"), wxT("5"), wxT("6"), wxEmptyString };
+	wxString m_PSAChoices[] = { wxT("4"), wxT("5"), wxT("6") };
 	int m_PSANChoices = sizeof( m_PSAChoices ) / sizeof( wxString );
 	m_PSA = new wxChoice( VCO_Settings->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, m_PSANChoices, m_PSAChoices, 0 );
 	m_PSA->SetSelection( 0 );
@@ -232,6 +273,14 @@ CDCM_controlpanel::CDCM_controlpanel( wxWindow* parent, wxWindowID id, const wxP
 	bSizer9->Add( m_staticText26, 0, wxALL, 5 );
 
 	m_Baseaddr = new wxTextCtrl( Misc->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	#ifdef __WXGTK__
+	if ( !m_Baseaddr->HasFlag( wxTE_MULTILINE ) )
+	{
+	m_Baseaddr->SetMaxLength( 7 );
+	}
+	#else
+	m_Baseaddr->SetMaxLength( 7 );
+	#endif
 	bSizer9->Add( m_Baseaddr, 0, wxALL, 5 );
 
 
@@ -311,10 +360,18 @@ CDCM_controlpanel::CDCM_controlpanel( wxWindow* parent, wxWindowID id, const wxP
 	m_staticText21->Wrap( -1 );
 	gSizer1->Add( m_staticText21, 0, wxALL, 5 );
 
-	m_Y2Y3_DIV = new wxTextCtrl( Y2_Y3->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	m_Y2Y3_DIV = new wxTextCtrl( Y2_Y3->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
+	#ifdef __WXGTK__
+	if ( !m_Y2Y3_DIV->HasFlag( wxTE_MULTILINE ) )
+	{
+	m_Y2Y3_DIV->SetMaxLength( 7 );
+	}
+	#else
+	m_Y2Y3_DIV->SetMaxLength( 7 );
+	#endif
 	gSizer1->Add( m_Y2Y3_DIV, 0, wxALL, 5 );
 
-	m_Y2Y3_FREQ = new wxTextCtrl( Y2_Y3->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	m_Y2Y3_FREQ = new wxTextCtrl( Y2_Y3->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
 	gSizer1->Add( m_Y2Y3_FREQ, 0, wxALL, 5 );
 
 
@@ -337,10 +394,10 @@ CDCM_controlpanel::CDCM_controlpanel( wxWindow* parent, wxWindowID id, const wxP
 	m_staticText39->Wrap( -1 );
 	gSizer2->Add( m_staticText39, 0, wxALL, 5 );
 
-	m_Y6_DIV = new wxTextCtrl( Y6->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	m_Y6_DIV = new wxTextCtrl( Y6->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
 	gSizer2->Add( m_Y6_DIV, 0, wxALL, 5 );
 
-	m_Y6_FREQ = new wxTextCtrl( Y6->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	m_Y6_FREQ = new wxTextCtrl( Y6->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
 	gSizer2->Add( m_Y6_FREQ, 0, wxALL, 5 );
 
 
@@ -363,10 +420,10 @@ CDCM_controlpanel::CDCM_controlpanel( wxWindow* parent, wxWindowID id, const wxP
 	m_staticText25->Wrap( -1 );
 	gSizer6->Add( m_staticText25, 0, wxALL, 5 );
 
-	m_Y7_DIV = new wxTextCtrl( Y7->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	m_Y7_DIV = new wxTextCtrl( Y7->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
 	gSizer6->Add( m_Y7_DIV, 0, wxALL, 5 );
 
-	m_Y7_FREQ = new wxTextCtrl( Y7->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	m_Y7_FREQ = new wxTextCtrl( Y7->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
 	gSizer6->Add( m_Y7_FREQ, 0, wxALL, 5 );
 
 
@@ -403,10 +460,18 @@ CDCM_controlpanel::CDCM_controlpanel( wxWindow* parent, wxWindowID id, const wxP
 	m_staticText41->Wrap( -1 );
 	gSizer3->Add( m_staticText41, 0, wxALL, 5 );
 
-	m_Y0Y1_DIV = new wxTextCtrl( Y0_Y1->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	m_Y0Y1_DIV = new wxTextCtrl( Y0_Y1->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
+	#ifdef __WXGTK__
+	if ( !m_Y0Y1_DIV->HasFlag( wxTE_MULTILINE ) )
+	{
+	m_Y0Y1_DIV->SetMaxLength( 7 );
+	}
+	#else
+	m_Y0Y1_DIV->SetMaxLength( 7 );
+	#endif
 	gSizer3->Add( m_Y0Y1_DIV, 0, wxALL, 5 );
 
-	m_Y0Y1_FREQ = new wxTextCtrl( Y0_Y1->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	m_Y0Y1_FREQ = new wxTextCtrl( Y0_Y1->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
 	gSizer3->Add( m_Y0Y1_FREQ, 0, wxALL, 5 );
 
 
@@ -429,10 +494,10 @@ CDCM_controlpanel::CDCM_controlpanel( wxWindow* parent, wxWindowID id, const wxP
 	m_staticText45->Wrap( -1 );
 	gSizer4->Add( m_staticText45, 0, wxALL, 5 );
 
-	m_Y4_DIV = new wxTextCtrl( Y4->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	m_Y4_DIV = new wxTextCtrl( Y4->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
 	gSizer4->Add( m_Y4_DIV, 0, wxALL, 5 );
 
-	m_Y4_FREQ = new wxTextCtrl( Y4->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	m_Y4_FREQ = new wxTextCtrl( Y4->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
 	gSizer4->Add( m_Y4_FREQ, 0, wxALL, 5 );
 
 
@@ -455,10 +520,10 @@ CDCM_controlpanel::CDCM_controlpanel( wxWindow* parent, wxWindowID id, const wxP
 	m_staticText451->Wrap( -1 );
 	gSizer41->Add( m_staticText451, 0, wxALL, 5 );
 
-	m_Y5_DIV = new wxTextCtrl( Y5->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	m_Y5_DIV = new wxTextCtrl( Y5->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
 	gSizer41->Add( m_Y5_DIV, 0, wxALL, 5 );
 
-	m_Y5_FREQ = new wxTextCtrl( Y5->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	m_Y5_FREQ = new wxTextCtrl( Y5->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
 	gSizer41->Add( m_Y5_FREQ, 0, wxALL, 5 );
 
 
@@ -482,58 +547,60 @@ CDCM_controlpanel::CDCM_controlpanel( wxWindow* parent, wxWindowID id, const wxP
 	Master->Fit( this );
 
 	// Connect Events
-	m_PrimaryFreq->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
-	m_SecondaryFreq->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
-	m_RDivider->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_PrimaryFreq->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_SecondaryFreq->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_RDivider->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
 	m_PrimarySel->Connect( wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( CDCM_controlpanel::OnRadio ), NULL, this );
 	m_SecondarySel->Connect( wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( CDCM_controlpanel::OnRadio ), NULL, this );
-	m_MDivider->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
-	m_NMultiplier->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_MDivider->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_NMultiplier->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
 	m_PSB->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( CDCM_controlpanel::OnChoice ), NULL, this );
 	m_PSA->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( CDCM_controlpanel::OnChoice ), NULL, this );
 	m_CDCM_VER->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( CDCM_controlpanel::OnChoice ), NULL, this );
+	m_Baseaddr->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
 	m_WriteAll->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( CDCM_controlpanel::OnButton ), NULL, this );
 	m_ReadAll->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( CDCM_controlpanel::OnButton ), NULL, this );
-	m_Y2Y3_DIV->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_Y2Y3_DIV->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
 	m_Y2Y3_FREQ->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnFreqEntry ), NULL, this );
-	m_Y6_DIV->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_Y6_DIV->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
 	m_Y6_FREQ->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnFreqEntry ), NULL, this );
-	m_Y7_DIV->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_Y7_DIV->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
 	m_Y7_FREQ->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnFreqEntry ), NULL, this );
-	m_Y0Y1_DIV->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_Y0Y1_DIV->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
 	m_Y0Y1_FREQ->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnFreqEntry ), NULL, this );
-	m_Y4_DIV->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_Y4_DIV->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
 	m_Y4_FREQ->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnFreqEntry ), NULL, this );
-	m_Y5_DIV->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_Y5_DIV->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
 	m_Y5_FREQ->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnFreqEntry ), NULL, this );
 }
 
 CDCM_controlpanel::~CDCM_controlpanel()
 {
 	// Disconnect Events
-	m_PrimaryFreq->Disconnect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
-	m_SecondaryFreq->Disconnect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
-	m_RDivider->Disconnect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_PrimaryFreq->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_SecondaryFreq->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_RDivider->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
 	m_PrimarySel->Disconnect( wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( CDCM_controlpanel::OnRadio ), NULL, this );
 	m_SecondarySel->Disconnect( wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( CDCM_controlpanel::OnRadio ), NULL, this );
-	m_MDivider->Disconnect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
-	m_NMultiplier->Disconnect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_MDivider->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_NMultiplier->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
 	m_PSB->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( CDCM_controlpanel::OnChoice ), NULL, this );
 	m_PSA->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( CDCM_controlpanel::OnChoice ), NULL, this );
 	m_CDCM_VER->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( CDCM_controlpanel::OnChoice ), NULL, this );
+	m_Baseaddr->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
 	m_WriteAll->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( CDCM_controlpanel::OnButton ), NULL, this );
 	m_ReadAll->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( CDCM_controlpanel::OnButton ), NULL, this );
-	m_Y2Y3_DIV->Disconnect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_Y2Y3_DIV->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
 	m_Y2Y3_FREQ->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnFreqEntry ), NULL, this );
-	m_Y6_DIV->Disconnect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_Y6_DIV->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
 	m_Y6_FREQ->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnFreqEntry ), NULL, this );
-	m_Y7_DIV->Disconnect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_Y7_DIV->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
 	m_Y7_FREQ->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnFreqEntry ), NULL, this );
-	m_Y0Y1_DIV->Disconnect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_Y0Y1_DIV->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
 	m_Y0Y1_FREQ->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnFreqEntry ), NULL, this );
-	m_Y4_DIV->Disconnect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_Y4_DIV->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
 	m_Y4_FREQ->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnFreqEntry ), NULL, this );
-	m_Y5_DIV->Disconnect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
+	m_Y5_DIV->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
 	m_Y5_FREQ->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnFreqEntry ), NULL, this );
 
 }

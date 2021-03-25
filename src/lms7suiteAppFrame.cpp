@@ -340,8 +340,8 @@ void LMS7SuiteAppFrame::OnShowCDCM6208( wxCommandEvent& event )
    {
       cdcmGUI = new CDCM6208(this);
       cdcmGUI->Connect(wxEVT_CLOSE_WINDOW, wxCloseEventHandler(LMS7SuiteAppFrame::OnCDCM6208Close), NULL, this);
-      cdcmGUI->Initialize(lmsControl);
       cdcmGUI->Show();
+      cdcmGUI->Initialize(lmsControl);
    }
 }
 
