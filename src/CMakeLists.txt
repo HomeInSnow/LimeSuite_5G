@@ -221,6 +221,10 @@ set(LMS7SUITE_GUI_SOURCES
     utilities_gui/dlgDeviceInfo.cpp
     utilities_gui/utilities_gui.cpp
     lms7suiteAppFrame.cpp
+    CDCM6208/CDCM6208_GUI.cpp
+    CDCM6208/CDCM6208.cpp
+    CDCM6208/CDCM6208_panelgui.cpp
+    CDCM6208/CDCM_Structure.bmp
     boards_wxgui/RFSpark_wxgui.cpp
     Si5351C/Si5351C_wxgui.cpp
     lms7suiteApp_gui.cpp
@@ -261,7 +265,8 @@ if (ENABLE_GUI)
     include_directories(lms7suiteEvents)
     include_directories(boards_wxgui)
     include_directories(limeRFE)
-    
+    include_directories(CDCM6208)
+
     include(${wxWidgets_USE_FILE})
     add_subdirectory(oglGraph)
 
@@ -271,7 +276,7 @@ if (ENABLE_GUI)
     set_target_properties(LimeSuiteGUI PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${BINARY_OUTPUT_DIR})
     target_compile_definitions(LimeSuiteGUI PRIVATE WIN32_LEAN_AND_MEAN)
-        
+
     target_link_libraries(LimeSuiteGUI LimeSuite oglGraph ${wxWidgets_LIBRARIES})
 
     if (MSVC)

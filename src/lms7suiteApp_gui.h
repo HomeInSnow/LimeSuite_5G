@@ -1,12 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Jun 17 2015)
+// C++ code generated with wxFormBuilder (version 3.9.0 Mar 22 2021)
 // http://www.wxformbuilder.org/
 //
-// PLEASE DO "NOT" EDIT THIS FILE!
+// PLEASE DO *NOT* EDIT THIS FILE!
 ///////////////////////////////////////////////////////////////////////////
 
-#ifndef __LMS7SUITEAPP_GUI_H__
-#define __LMS7SUITEAPP_GUI_H__
+#pragma once
 
 #include <wx/artprov.h>
 #include <wx/xrc/xmlres.h>
@@ -37,18 +36,19 @@ class lms7002_mainPanel;
 ///////////////////////////////////////////////////////////////////////////////
 /// Class AppFrame_view
 ///////////////////////////////////////////////////////////////////////////////
-class AppFrame_view : public wxFrame 
+class AppFrame_view : public wxFrame
 {
 	private:
-	
+
 	protected:
 		enum
 		{
 			idMenuQuit = 1000,
+			ID_MENUITEM_CDCM6208,
 			ID_MENUITEM_LIMERFE,
 			idMenuAbout
 		};
-		
+
 		wxMenuBar* mbar;
 		wxMenu* fileMenu;
 		wxMenu* mnuOptions;
@@ -60,8 +60,8 @@ class AppFrame_view : public wxFrame
 		wxScrolledWindow* m_scrolledWindow1;
 		wxFlexGridSizer* contentSizer;
 		lms7002_mainPanel* mContent;
-		
-		// Virtual event handlers, overide them in your derived class
+
+		// Virtual event handlers, override them in your derived class
 		virtual void OnClose( wxCloseEvent& event ) { event.Skip(); }
 		virtual void OnQuit( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnShowConnectionSettings( wxCommandEvent& event ) { event.Skip(); }
@@ -69,6 +69,7 @@ class AppFrame_view : public wxFrame
 		virtual void OnShowFFTviewer( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnShowADF4002( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnShowSi5351C( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnShowCDCM6208( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnShowPrograming( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnShowFPGAcontrols( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnShowDeviceInfo( wxCommandEvent& event ) { event.Skip(); }
@@ -77,23 +78,23 @@ class AppFrame_view : public wxFrame
 		virtual void OnShowBoardControls( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnShowLimeRFE( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnAbout( wxCommandEvent& event ) { event.Skip(); }
-		
-	
+
+
 	public:
-		
+
 		AppFrame_view( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Lime Suite GUI"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
-		
+
 		~AppFrame_view();
-	
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class dlgAbout_view
 ///////////////////////////////////////////////////////////////////////////////
-class dlgAbout_view : public wxDialog 
+class dlgAbout_view : public wxDialog
 {
 	private:
-	
+
 	protected:
 		wxStaticBitmap* imgLogo;
 		wxStaticText* ID_STATICTEXT1;
@@ -102,17 +103,16 @@ class dlgAbout_view : public wxDialog
 		wxStaticText* ID_STATICTEXT5;
 		wxHyperlinkCtrl* ID_HYPERLINKCTRL1;
 		wxButton* btnClose;
-		
-		// Virtual event handlers, overide them in your derived class
+
+		// Virtual event handlers, override them in your derived class
 		virtual void OnInit( wxInitDialogEvent& event ) { event.Skip(); }
 		virtual void OnbtnClose( wxCommandEvent& event ) { event.Skip(); }
-		
-	
+
+
 	public:
-		
-		dlgAbout_view( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("About"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE ); 
+
+		dlgAbout_view( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("About"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE );
 		~dlgAbout_view();
-	
+
 };
 
-#endif //__LMS7SUITEAPP_GUI_H__

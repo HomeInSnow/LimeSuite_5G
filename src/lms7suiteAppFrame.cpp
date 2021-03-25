@@ -17,6 +17,7 @@
 #include "fftviewer_frFFTviewer.h"
 #include "ADF4002_wxgui.h"
 #include "Si5351C_wxgui.h"
+#include "CDCM6208.h"
 #include "LMS_Programing_wxgui.h"
 #include "pnlMiniLog.h"
 #include "FPGAcontrols_wxgui.h"
@@ -99,6 +100,7 @@ LMS7SuiteAppFrame::LMS7SuiteAppFrame( wxWindow* parent ) :
     programmer = nullptr;
     fftviewer = nullptr;
     adfGUI = nullptr;
+    cdcmGUI = nullptr;
     si5351gui = nullptr;
     fpgaControls = nullptr;
     deviceInfo = nullptr;
@@ -190,6 +192,8 @@ void LMS7SuiteAppFrame::UpdateConnections(lms_device_t* lms7controlPort)
         fftviewer->Initialize(lmsControl);
     if(adfGUI)
         adfGUI->Initialize(lmsControl);
+    if(cdcmGUI)
+        cdcmGUI->Initialize(lmsControl);
     if(fpgaControls)
         fpgaControls->Initialize(lmsControl);
     if(deviceInfo)
@@ -315,6 +319,30 @@ void LMS7SuiteAppFrame::OnShowFFTviewer(wxCommandEvent& event)
 void LMS7SuiteAppFrame::OnLmsChanged(wxCommandEvent& event)
 {
     m_lmsSelection = event.GetInt();
+}
+
+void LMS7SuiteAppFrame::OnCDCM6208Close( wxCloseEvent& event )
+{
+   cdcmGUI->Destroy();
+   cdcmGUI = nullptr;
+}
+
+void LMS7SuiteAppFrame::OnShowCDCM6208( wxCommandEvent& event )
+{
+   if(cdcmGUI)  //it's already opened
+   {
+      cdcmGUI->Show(true);
+      cdcmGUI->Iconize(false);  // restore the window if minimized
+      cdcmGUI->SetFocus();  // focus on my window
+      cdcmGUI->Raise();  // bring window to front
+   }
+   else
+   {
+      cdcmGUI = new CDCM6208(this);
+      cdcmGUI->Connect(wxEVT_CLOSE_WINDOW, wxCloseEventHandler(LMS7SuiteAppFrame::OnCDCM6208Close), NULL, this);
+      cdcmGUI->Initialize(lmsControl);
+      cdcmGUI->Show();
+   }
 }
 
 void LMS7SuiteAppFrame::OnADF4002Close(wxCloseEvent& event)
