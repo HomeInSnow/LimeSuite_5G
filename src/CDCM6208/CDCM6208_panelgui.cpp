@@ -163,7 +163,6 @@ void CDCM6208_panelgui::OnRadio( wxCommandEvent& event )
    {
       InMux = 1; // select primary by default
    }
-
    Recalculate();
    UpdateGUI();
 }
@@ -219,38 +218,38 @@ void CDCM6208_panelgui::OnButton( wxCommandEvent& event )
    if(obj == m_WriteAll)
    {
       //REG1
-      regval = (MDivider << 2) | (NMultiplier1 >>8);
+      regval = ((MDivider-1) << 2) | ((NMultiplier1-1) >>8);
       LMS_WriteFPGAReg(lmsControl,SPI_BASEADDR+1,regval);
       //REG2
-      regval = (NMultiplier1<<8) | NMultiplier0;
+      regval = ((NMultiplier1-1)<<8) | (NMultiplier0-1);
       LMS_WriteFPGAReg(lmsControl,SPI_BASEADDR+2,regval);
       //REG3
       LMS_ReadFPGAReg(lmsControl,SPI_BASEADDR+3,&regval);
-      regval &= !0xF;
+      regval &= ~0xF;
       regval |= ((PrescalerA-4)&3);
       regval |= ((PrescalerB-4)&3)<<2;
       LMS_WriteFPGAReg(lmsControl,SPI_BASEADDR+3,regval);
       //REG4
       LMS_ReadFPGAReg(lmsControl,SPI_BASEADDR+4,&regval);
-      regval &= !(0x1F);
+      regval &= ~(0x1F00);
       regval |= ((RDivider-1)&0xF)<<8;
-      regval |= InMux&1 <<12;
+      regval |= ((InMux-1)&1) <<12;
       LMS_WriteFPGAReg(lmsControl,SPI_BASEADDR+4,regval);
       //REG6
-      regval = 0 | (Y0Y1_Divider&0xFF);
+      regval = 0 | ((Y0Y1_Divider-1)&0xFF);
       LMS_WriteFPGAReg(lmsControl,SPI_BASEADDR+6,regval);
       //REG8
-      regval = 0 | (Y2Y3_Divider&0xFF);
+      regval = 0 | ((Y2Y3_Divider-1)&0xFF);
       LMS_WriteFPGAReg(lmsControl,SPI_BASEADDR+8,regval);
       ////Y4
       //REG9
       LMS_ReadFPGAReg(lmsControl,SPI_BASEADDR+9,&regval);
-      regval &= !0x1E;
+      regval &= ~0x1E00;
       regval |= (((int)Y4.fractional)<<9);
       regval |= ((Y4.prescaler-2)&7)<<10;
       LMS_WriteFPGAReg(lmsControl,SPI_BASEADDR+9,regval);
       //REG10
-      regval = 0 | ((Y4.integer_part&0xFF)<<4);
+      regval = 0 | (((Y4.integer_part-1)&0xFF)<<4);
       regval |= (Y4.fractional_part>>16)&0xF;
       LMS_WriteFPGAReg(lmsControl,SPI_BASEADDR+10,regval);
       //REG11
@@ -259,12 +258,12 @@ void CDCM6208_panelgui::OnButton( wxCommandEvent& event )
       ////Y5
       //REG12
       LMS_ReadFPGAReg(lmsControl,SPI_BASEADDR+12,&regval);
-      regval &= !0x1E;
+      regval &= ~0x1E00;
       regval |= (((int)Y5.fractional)<<9);
       regval |= ((Y5.prescaler-2)&7)<<10;
       LMS_WriteFPGAReg(lmsControl,SPI_BASEADDR+12,regval);
       //REG13
-      regval = 0 | ((Y5.integer_part&0xFF)<<4);
+      regval = 0 | (((Y5.integer_part-1)&0xFF)<<4);
       regval |= (Y5.fractional_part>>16)&0xF;
       LMS_WriteFPGAReg(lmsControl,SPI_BASEADDR+13,regval);
       //REG14
@@ -273,12 +272,12 @@ void CDCM6208_panelgui::OnButton( wxCommandEvent& event )
       ////Y6
       //REG15
       LMS_ReadFPGAReg(lmsControl,SPI_BASEADDR+15,&regval);
-      regval &= !0x1E;
+      regval &= ~0x1E00;
       regval |= (((int)Y6.fractional)<<9);
       regval |= ((Y6.prescaler-2)&7)<<10;
       LMS_WriteFPGAReg(lmsControl,SPI_BASEADDR+15,regval);
       //REG16
-      regval = 0 | ((Y6.integer_part&0xFF)<<4);
+      regval = 0 | (((Y6.integer_part-1)&0xFF)<<4);
       regval |= (Y6.fractional_part>>16)&0xF;
       LMS_WriteFPGAReg(lmsControl,SPI_BASEADDR+16,regval);
       //REG17
@@ -287,12 +286,12 @@ void CDCM6208_panelgui::OnButton( wxCommandEvent& event )
       ////Y7
       //REG18
       LMS_ReadFPGAReg(lmsControl,SPI_BASEADDR+18,&regval);
-      regval &= !0x1E;
+      regval &= ~0x1E00;
       regval |= (((int)Y7.fractional)<<9);
       regval |= ((Y7.prescaler-2)&7)<<10;
       LMS_WriteFPGAReg(lmsControl,SPI_BASEADDR+18,regval);
       //REG19
-      regval = 0 | ((Y7.integer_part&0xFF)<<4);
+      regval = 0 | (((Y7.integer_part-1)&0xFF)<<4);
       regval |= (Y7.fractional_part>>16)&0xF;
       LMS_WriteFPGAReg(lmsControl,SPI_BASEADDR+19,regval);
       //REG20
@@ -323,10 +322,11 @@ void CDCM6208_panelgui::OnButton( wxCommandEvent& event )
       //REG1
       LMS_ReadFPGAReg(lmsControl,SPI_BASEADDR+1,&regval);
       MDivider = (regval >> 2) + 1;
-      NMultiplier1 = 0 | ((regval & 3)<<8) + 1;
+      NMultiplier1 = 0 | ((regval & 3)<<8);
       //REG2
       LMS_ReadFPGAReg(lmsControl,SPI_BASEADDR+2,&regval);
-      NMultiplier1 |= (regval>>8) + 1;
+      NMultiplier1 |= (regval>>8);
+      NMultiplier1 += 1;
       NMultiplier0 = (regval & 0xFF) + 1;
       //REG3
       LMS_ReadFPGAReg(lmsControl,SPI_BASEADDR+3,&regval);
@@ -335,7 +335,7 @@ void CDCM6208_panelgui::OnButton( wxCommandEvent& event )
       //REG4
       LMS_ReadFPGAReg(lmsControl,SPI_BASEADDR+4,&regval);
       RDivider = ((regval >> 8) & 0xF)+1;
-      InMux = ((regval >> 13)&1)+1;
+      InMux = ((regval >> 12)&1)+1;
       //REG6
       LMS_ReadFPGAReg(lmsControl,SPI_BASEADDR+6,&regval);
       Y0Y1_Divider = (regval&0xFF)+1;
@@ -349,7 +349,7 @@ void CDCM6208_panelgui::OnButton( wxCommandEvent& event )
       Y4.prescaler = ((regval>>10)&7)+2;
       //REG10
       LMS_ReadFPGAReg(lmsControl,SPI_BASEADDR+10,&regval);
-      Y4.integer_part = ((regval>>4)&0xFF);
+      Y4.integer_part = ((regval>>4)&0xFF)+1;
       Y4.fractional_part = 0 | ((regval&0xF)<<16);
       //REG11
       LMS_ReadFPGAReg(lmsControl,SPI_BASEADDR+11,&regval);
@@ -362,7 +362,7 @@ void CDCM6208_panelgui::OnButton( wxCommandEvent& event )
       Y5.prescaler = ((regval>>10)&7)+2;
       //REG13
       LMS_ReadFPGAReg(lmsControl,SPI_BASEADDR+13,&regval);
-      Y5.integer_part = ((regval>>4)&0xFF);
+      Y5.integer_part = ((regval>>4)&0xFF)+1;
       Y5.fractional_part = 0 | ((regval&0xF)<<16);
       //REG14
       LMS_ReadFPGAReg(lmsControl,SPI_BASEADDR+14,&regval);
@@ -375,7 +375,7 @@ void CDCM6208_panelgui::OnButton( wxCommandEvent& event )
       Y6.prescaler = ((regval>>10)&7)+2;
       //REG16
       LMS_ReadFPGAReg(lmsControl,SPI_BASEADDR+16,&regval);
-      Y6.integer_part = ((regval>>4)&0xFF);
+      Y6.integer_part = ((regval>>4)&0xFF)+1;
       Y6.fractional_part = 0 | ((regval&0xF)<<16);
       //REG17
       LMS_ReadFPGAReg(lmsControl,SPI_BASEADDR+17,&regval);
@@ -388,7 +388,7 @@ void CDCM6208_panelgui::OnButton( wxCommandEvent& event )
       Y7.prescaler = ((regval>>10)&7)+2;
       //REG19
       LMS_ReadFPGAReg(lmsControl,SPI_BASEADDR+19,&regval);
-      Y7.integer_part = ((regval>>4)&0xFF);
+      Y7.integer_part = ((regval>>4)&0xFF)+1;
       Y7.fractional_part = 0 | ((regval&0xF)<<16);
       //REG20
       LMS_ReadFPGAReg(lmsControl,SPI_BASEADDR+20,&regval);
