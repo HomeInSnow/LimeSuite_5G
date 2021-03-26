@@ -305,18 +305,21 @@ void CDCM6208_panelgui::OnButton( wxCommandEvent& event )
    {
       //Request FPGA to read CDCM registers
       regval = 1;
+      timeout = 5;
       LMS_WriteFPGAReg(lmsControl,SPI_BASEADDR+24,regval);
-      while(regval != 2)
+      while(regval != 2 && timeout > 0){
          LMS_ReadFPGAReg(lmsControl,SPI_BASEADDR+24,&regval);
+         timeout--;
+      }
       //Download and parse register values from FPGA
       //REG1
       LMS_ReadFPGAReg(lmsControl,SPI_BASEADDR+1,&regval);
       MDivider = (regval >> 2) + 1;
-      NMultiplier1 = 0 | ((regval & 3)<<8);
+      NMultiplier1 = 0 | ((regval & 3)<<8) + 1;
       //REG2
       LMS_ReadFPGAReg(lmsControl,SPI_BASEADDR+2,&regval);
-      NMultiplier1 |= (regval>>8);
-      NMultiplier0 = (regval & 0xFF);
+      NMultiplier1 |= (regval>>8) + 1;
+      NMultiplier0 = (regval & 0xFF) + 1;
       //REG3
       LMS_ReadFPGAReg(lmsControl,SPI_BASEADDR+3,&regval);
       PrescalerA = (regval & 3)+4;
@@ -390,6 +393,8 @@ void CDCM6208_panelgui::OnButton( wxCommandEvent& event )
       LMS_ReadFPGAReg(lmsControl,SPI_BASEADDR+23,&regval);
       CDCM_VER = (regval>>3)&7;
    }
+   Recalculate();
+   UpdateGUI();
 }
 
 void CDCM6208_panelgui::SolveN(int* Target, int* Mult8bit, int* Mult10bit)
