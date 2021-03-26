@@ -76,6 +76,7 @@ protected:
    void Recalculate();
    void SolveN(int* Target, int* Mult8bit, int* Mult10bit);
    void SolveFracDiv(double* target, Fractional_config* config, double* result);
+   void CalculateFracDiv(double* target, Fractional_config* config);
 };
 
 #endif // __CDCM6208_panelgui__
