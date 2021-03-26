@@ -565,66 +565,51 @@ void CDCM6208_panelgui::SolveFracDiv(double* target, Fractional_config* config, 
    // 1 0000 0000 1111 1111 1111 1111 1111
    // \  int    / \ fractional           /
    *result = *target;
-   double max_fractional_val = ((1<<28) + ((1<<20)-1))/(double)(1<<20);
-   int max_integer_val = 1<<8 * 3;
+   double max_fractional_val = (((1<<28) + ((1<<20)-1))/(double)(1<<20))*3;
    //Check bounds
    if(*result < 1)
       *result = 1;
-   // If desired divider is higher than max fractional value,
-   // attempt to find closest integer divider
    else if(*result > max_fractional_val)
    {
-      if(*result > max_integer_val)
-         *result = max_integer_val;
-
-      config->fractional = false;
-
-      // Find non fractional config
-      double div2_result;
-      double div3_result;
-      // in non fractional mode output must be divided
-      // by 2 or 3
-      div2_result = *result / 2;
-      div3_result = *result / 3;
-      // check bounds
-      if(div2_result > (1<<8))
-         div2_result = 1<<8;
-      else if(div2_result < 1)
-         div2_result = 1;
-
-      if(div3_result > (1<<8))
-         div3_result = 1<<8;
-      else if(div3_result < 1)
-         div3_result = 1;
-      // find best match
-      double div2_difference = abs(*result - round(div2_result) * 2.0);
-      double div3_difference = abs(*result - round(div3_result) * 3.0);
-
-      if(div2_difference < div3_difference)
-      {
-         config->prescaler = 2;
-         config->integer_part = (int)round(div2_result);
-         *result = (int)round(div2_result)*2;
-      }
-      else
-      {
-         config->prescaler = 3;
-         config->integer_part = (int)round(div3_result);
-         *result = (int)round(div3_result)*3;
-      }
-      return;
+      *result = max_fractional_val;
    }
-
-   // If divider is in bounds for fractional mode
-   // solve for fractional divider
    config->fractional = true;
-   // Find fractional config
-   int placeholder_int;
-   placeholder_int = (int)(*result * (1<<20));
-   *result = (float)placeholder_int / (1<<20);
-   config->integer_part = (placeholder_int >> 20) & ((1<<8) - 1);
-   config->fractional_part = placeholder_int & ((1<<20) - 1);
+
+   // Divider must be multiplied by 2 or 3
+   double div2_result;
+   double div3_result;
+   int div2_fixed;
+   int div3_fixed;
+   div2_result = *result / 2;
+   div3_result = *result / 3;
+
+   //cast float into 8.20 fixed point integer
+   div2_fixed = (int)(div2_result * ((1<<20)&((1<<28)-1)));
+   //recast back to provide float result to GUI
+   div2_result = (float)div2_fixed / (1<<20);
+   //cast float into 8.20 fixed point integer
+   div3_fixed = (int)(div3_result * ((1<<20)&((1<<28)-1)));
+   //recast back to provide float result to GUI
+   div3_result = (float)div3_fixed / (1<<20);
+   // find best match
+   double div2_difference = abs(*result - (div2_result * 2.0));
+   double div3_difference = abs(*result - (div3_result * 3.0));
+   if(div2_difference < div3_difference)
+   {
+      config->integer_part = (div2_fixed >> 20) & ((1<<8) - 1);
+      config->fractional_part = div2_fixed & ((1<<20) - 1);
+      config->prescaler = 2;
+      *result = div2_result*2;
+   }
+   else
+   {
+      config->integer_part = (div3_fixed >> 20) & ((1<<8) - 1);
+      config->fractional_part = div3_fixed & ((1<<20) - 1);
+      config->prescaler = 3;
+      *result = div3_result*3;
+   }
 }
+
 
 void CDCM6208_panelgui::CalculateFracDiv(double* target, Fractional_config* config)
 {
@@ -633,9 +618,10 @@ void CDCM6208_panelgui::CalculateFracDiv(double* target, Fractional_config* conf
       *target = config->fractional_part;
       *target = *target / (1<<20);
       *target = *target + config->integer_part;
+      *target = *target * config->prescaler;
    }
    else
    {
-      *target = config->integer_part * config->prescaler;
+      *target = config->integer_part;
    }
 }
