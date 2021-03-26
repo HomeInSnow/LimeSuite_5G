@@ -298,6 +298,14 @@ void CDCM6208_panelgui::OnButton( wxCommandEvent& event )
       //REG20
       regval = Y7.fractional_part&0xFFFF;
       LMS_WriteFPGAReg(lmsControl,SPI_BASEADDR+20,regval);
+      //LOAD TO CDCM
+      regval = 1;
+      LMS_WriteFPGAReg(lmsControl,SPI_BASEADDR+21,regval);
+      //GET CONFIG RESULT
+      // Lock status (21 CDCM register is mapped to 22 FPGA register)
+      LMS_ReadFPGAReg(lmsControl,SPI_BASEADDR+22,&regval);
+      lock_status = !(regval>>2)&1;
+
 
       //write all vals to fpga/cdcm
    }
@@ -305,7 +313,7 @@ void CDCM6208_panelgui::OnButton( wxCommandEvent& event )
    {
       //Request FPGA to read CDCM registers
       regval = 1;
-      timeout = 5;
+      uint8_t timeout = 5;
       LMS_WriteFPGAReg(lmsControl,SPI_BASEADDR+24,regval);
       while(regval != 2 && timeout > 0){
          LMS_ReadFPGAReg(lmsControl,SPI_BASEADDR+24,&regval);
@@ -388,7 +396,7 @@ void CDCM6208_panelgui::OnButton( wxCommandEvent& event )
       CalculateFracDiv(&Y7_Divider, &Y7);
       // Lock status (21 CDCM register is mapped to 22 FPGA register)
       LMS_ReadFPGAReg(lmsControl,SPI_BASEADDR+22,&regval);
-      lock_status = (regval>>2)&1;
+      lock_status = !(regval>>2)&1;
       //CDCM version
       LMS_ReadFPGAReg(lmsControl,SPI_BASEADDR+23,&regval);
       CDCM_VER = (regval>>3)&7;
