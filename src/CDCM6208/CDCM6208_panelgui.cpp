@@ -301,6 +301,13 @@ void CDCM6208_panelgui::OnButton( wxCommandEvent& event )
       regval = 1;
       LMS_WriteFPGAReg(lmsControl,SPI_BASEADDR+21,regval);
       //GET CONFIG RESULT
+      // Ask FPGA to retrieve CDCM register data
+      uint8_t timeout = 5;
+      LMS_WriteFPGAReg(lmsControl,SPI_BASEADDR+24,regval);
+      while(regval != 2 && timeout > 0){
+         LMS_ReadFPGAReg(lmsControl,SPI_BASEADDR+24,&regval);
+         timeout--;
+      }
       // Lock status (21 CDCM register is mapped to 22 FPGA register)
       LMS_ReadFPGAReg(lmsControl,SPI_BASEADDR+22,&regval);
       lock_status = !(regval>>2)&1;
@@ -409,15 +416,15 @@ void CDCM6208_panelgui::SolveN(int* Target, int* Mult8bit, int* Mult10bit)
 {
    //find multiplier combination to get desired ratio
    double res;
-   for(int i8 = 1; i8 <= 256; i8++)
+   for(int i10 = 1; i10 <= 1024; i10++)
    {
-      res = double(*Target)/i8;
-      if(res < (1<<10)) //check max value
+      res = double(*Target)/i10;
+      if(res < (1<<8)) //check max value
       {  // check if res is integer
          if(res-(int)res == 0)
          {
-            *Mult8bit  = i8;
-            *Mult10bit = (int)res;
+            *Mult8bit  = (int)res;
+            *Mult10bit = i10;
             return;
          }
       }

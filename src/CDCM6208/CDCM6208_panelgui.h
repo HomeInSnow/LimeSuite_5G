@@ -74,8 +74,11 @@ protected:
    void OnButton( wxCommandEvent& event )override;
    // Other functions
    void Recalculate();
+   // Finds a combination for getting desired N integer divider
    void SolveN(int* Target, int* Mult8bit, int* Mult10bit);
+   // Find a configuration to implement requested target fractional divider
    void SolveFracDiv(double* target, Fractional_config* config, double* result);
+   // Calculate fractional divider value from configuration structure
    void CalculateFracDiv(double* target, Fractional_config* config);
 };
 
