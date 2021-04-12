@@ -29,6 +29,7 @@ class CDCM6208_panelgui;
 #include <wx/choice.h>
 #include <wx/statbox.h>
 #include <wx/button.h>
+#include <wx/checkbox.h>
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -90,36 +91,63 @@ class CDCM_controlpanel : public wxPanel
 		wxStaticText* m_LockStatus;
 		wxButton* m_WriteAll;
 		wxButton* m_ReadAll;
+		wxStaticText* m_staticText42;
+		wxCheckBox* m_Y0Y1_chk;
+		wxStaticText* m_staticText43;
+		wxCheckBox* m_Y2Y3_chk;
+		wxStaticText* m_staticText442;
+		wxCheckBox* m_Y4_chk;
+		wxStaticText* m_staticText452;
+		wxCheckBox* m_Y5_chk;
+		wxStaticText* m_staticText46;
+		wxCheckBox* m_Y6_chk;
+		wxStaticText* m_staticText47;
+		wxCheckBox* m_Y7_chk;
+		wxButton* m_button4;
+		wxStaticText* m_FrequencyPlanRes;
 		wxStaticText* m_staticText20;
 		wxStaticText* m_staticText21;
+		wxStaticText* m_staticText49;
 		wxTextCtrl* m_Y2Y3_DIV;
 		wxTextCtrl* m_Y2Y3_FREQ;
+		wxTextCtrl* m_Y2Y3_FREQ_req;
 		wxStaticText* m_staticText38;
 		wxStaticText* m_staticText39;
+		wxStaticText* m_staticText501;
 		wxTextCtrl* m_Y6_DIV;
 		wxTextCtrl* m_Y6_FREQ;
+		wxTextCtrl* m_Y6_FREQ_req;
 		wxStaticText* m_staticText24;
 		wxStaticText* m_staticText25;
+		wxStaticText* m_staticText511;
 		wxTextCtrl* m_Y7_DIV;
 		wxTextCtrl* m_Y7_FREQ;
+		wxTextCtrl* m_Y7_FREQ_req;
 		wxStaticText* m_staticText40;
 		wxStaticText* m_staticText41;
+		wxStaticText* m_staticText52;
 		wxTextCtrl* m_Y0Y1_DIV;
 		wxTextCtrl* m_Y0Y1_FREQ;
+		wxTextCtrl* m_Y0Y1_FREQ_req;
 		wxStaticText* m_staticText44;
 		wxStaticText* m_staticText45;
+		wxStaticText* m_staticText53;
 		wxTextCtrl* m_Y4_DIV;
 		wxTextCtrl* m_Y4_FREQ;
+		wxTextCtrl* m_Y4_FREQ_req;
 		wxStaticText* m_staticText441;
 		wxStaticText* m_staticText451;
+		wxStaticText* m_staticText54;
 		wxTextCtrl* m_Y5_DIV;
 		wxTextCtrl* m_Y5_FREQ;
+		wxTextCtrl* m_Y5_FREQ_req;
 
 		// Virtual event handlers, override them in your derived class
 		virtual void OnChange( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnRadio( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnChoice( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnButton( wxCommandEvent& event ) { event.Skip(); }
+		virtual void onFP_chk( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnFreqEntry( wxCommandEvent& event ) { event.Skip(); }
 
 

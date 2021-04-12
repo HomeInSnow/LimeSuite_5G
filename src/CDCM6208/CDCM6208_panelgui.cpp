@@ -19,6 +19,24 @@ void CDCM6208_panelgui::Initialize(lms_device_t* pModule)
    lmsControl = pModule;
    UpdateGUI();
    m_Baseaddr->SetValue(wxString::Format(_("%i"),SPI_BASEADDR));
+   auto str = wxString::Format(_("%f"),Y2Y3_Frequency/1e6);
+      m_Y2Y3_FREQ_req->SetValue(str);
+   //Y6 Frequency
+   str = wxString::Format(_("%f"),Y6_Frequency/1e6);
+      m_Y6_FREQ_req->SetValue(str);
+   //Y7 Frequency
+   str = wxString::Format(_("%f"),Y7_Frequency/1e6);
+      m_Y7_FREQ_req->SetValue(str);
+   //Y0Y1 Frequency
+   str = wxString::Format(_("%f"),Y0Y1_Frequency/1e6);
+      m_Y0Y1_FREQ_req->SetValue(str);
+   //Y4 Frequency
+   str = wxString::Format(_("%f"),Y4_Frequency/1e6);
+      m_Y4_FREQ_req->SetValue(str);
+   //Y5 Frequency
+   str = wxString::Format(_("%f"),Y5_Frequency/1e6);
+      m_Y5_FREQ_req->SetValue(str);
+
 }
 
 void CDCM6208_panelgui::OnChange( wxCommandEvent& event )
@@ -203,13 +221,77 @@ void CDCM6208_panelgui::OnChoice( wxCommandEvent& event )
 
 void CDCM6208_panelgui::OnFreqEntry( wxCommandEvent& event )
 {
-   auto obj = event.GetEventObject();
-   // TODO: add solver function here
+   try
+   {
+      Frequency_plan Frequency_plan;
+      // Get requested frequencies from GUI
+      Frequency_plan.Y0Y1_Frequency  = std::stod((std::string)m_Y0Y1_FREQ_req->GetValue())*1e6;
+      Frequency_plan.Y2Y3_Frequency  = std::stod((std::string)m_Y2Y3_FREQ_req->GetValue())*1e6;
+      Frequency_plan.Y4_Frequency    = std::stod((std::string)m_Y4_FREQ_req->GetValue())*1e6;
+      Frequency_plan.Y5_Frequency    = std::stod((std::string)m_Y5_FREQ_req->GetValue())*1e6;
+      Frequency_plan.Y6_Frequency    = std::stod((std::string)m_Y6_FREQ_req->GetValue())*1e6;
+      Frequency_plan.Y7_Frequency    = std::stod((std::string)m_Y7_FREQ_req->GetValue())*1e6;
+      // Get input frequency
+      if (InMux == 1)
+         Frequency_plan.Input_Frequency = PrimaryF/RDivider;
+      else
+         Frequency_plan.Input_Frequency = SecondaryF;
 
-   // Display newly calculated values in GUI
+      // Get care mask
+      Frequency_plan.int_care_mask = int_care_mask;
+      // Find VCO config
+      VCO_config VCOConfig = SolveFreqPlanSingleCDCM(Frequency_plan, VCO_MIN, VCO_MAX);
+      // If valid config found
+      if (VCOConfig.valid)
+      {
+         // Update VCO config
+         SolveN(&VCOConfig.Multiplier,&NMultiplier0,&NMultiplier1);
+         MDivider   = VCOConfig.Divisor;
+         PrescalerA = VCOConfig.Prescaler;
+         PrescalerB = VCOConfig.Prescaler;
+         Recalculate();
+         m_FrequencyPlanRes->SetLabel("Valid Config Found");
+         m_FrequencyPlanRes->SetForegroundColour(wxColour("#00ff00"));
+      }
+      else
+      {
+         // Do not update VCO config
+         m_FrequencyPlanRes->SetLabel("No Valid Config Found");
+         m_FrequencyPlanRes->SetForegroundColour(wxColour("#ff0000"));
+      }
+      // Update dividers
+      Y0Y1_Divider=(int)round((VCOF/PrescalerA)/Frequency_plan.Y0Y1_Frequency);
+      Y2Y3_Divider=(int)round((VCOF/PrescalerB)/Frequency_plan.Y2Y3_Frequency);
+      double placeholder = (VCOF/PrescalerA)/Frequency_plan.Y4_Frequency;
+      SolveFracDiv(&placeholder,&Y4,&Y4_Divider);
+      placeholder = (VCOF/PrescalerA)/Frequency_plan.Y5_Frequency;
+      SolveFracDiv(&placeholder,&Y5,&Y5_Divider);
+      placeholder = (VCOF/PrescalerB)/Frequency_plan.Y6_Frequency;
+      SolveFracDiv(&placeholder,&Y6,&Y6_Divider);
+      placeholder = (VCOF/PrescalerB)/Frequency_plan.Y7_Frequency;
+      SolveFracDiv(&placeholder,&Y7,&Y7_Divider);
+      // Recalculate and display newly calculated values in GUI
+      Recalculate();
+      UpdateGUI();
+   }
+   catch(std::invalid_argument)
+   {
+      m_FrequencyPlanRes->SetLabel("Invalid Freq Request");
+      m_FrequencyPlanRes->SetForegroundColour(wxColour("#ff0000"));
+   }
+}
+void CDCM6208_panelgui::onFP_chk( wxCommandEvent& event )
+{
+
+   int_care_mask = 0;
+   int_care_mask |= (((int)m_Y0Y1_chk->GetValue())<<0);
+   int_care_mask |= (((int)m_Y2Y3_chk->GetValue())<<1);
+   int_care_mask |= (((int)m_Y4_chk->GetValue())<<2);
+   int_care_mask |= (((int)m_Y5_chk->GetValue())<<3);
+   int_care_mask |= (((int)m_Y6_chk->GetValue())<<4);
+   int_care_mask |= (((int)m_Y7_chk->GetValue())<<5);
    UpdateGUI();
 }
-
 void CDCM6208_panelgui::OnButton( wxCommandEvent& event )
 {
    auto obj = event.GetEventObject();
@@ -302,7 +384,7 @@ void CDCM6208_panelgui::OnButton( wxCommandEvent& event )
       LMS_WriteFPGAReg(lmsControl,SPI_BASEADDR+21,regval);
       //GET CONFIG RESULT
       // Ask FPGA to retrieve CDCM register data
-      uint8_t timeout = 5;
+      int timeout = 5;
       LMS_WriteFPGAReg(lmsControl,SPI_BASEADDR+24,regval);
       while(regval != 2 && timeout > 0){
          LMS_ReadFPGAReg(lmsControl,SPI_BASEADDR+24,&regval);
@@ -319,7 +401,7 @@ void CDCM6208_panelgui::OnButton( wxCommandEvent& event )
    {
       //Request FPGA to read CDCM registers
       regval = 1;
-      uint8_t timeout = 5;
+      int timeout = 5;
       LMS_WriteFPGAReg(lmsControl,SPI_BASEADDR+24,regval);
       while(regval != 2 && timeout > 0){
          LMS_ReadFPGAReg(lmsControl,SPI_BASEADDR+24,&regval);
@@ -412,7 +494,7 @@ void CDCM6208_panelgui::OnButton( wxCommandEvent& event )
    UpdateGUI();
 }
 
-void CDCM6208_panelgui::SolveN(int* Target, int* Mult8bit, int* Mult10bit)
+int CDCM6208_panelgui::SolveN(int* Target, int* Mult8bit, int* Mult10bit)
 {
    //find multiplier combination to get desired ratio
    double res;
@@ -421,14 +503,15 @@ void CDCM6208_panelgui::SolveN(int* Target, int* Mult8bit, int* Mult10bit)
       res = double(*Target)/i10;
       if(res < (1<<8)) //check max value
       {  // check if res is integer
-         if(res-(int)res == 0)
+         if(isInteger(res))
          {
             *Mult8bit  = (int)res;
             *Mult10bit = i10;
-            return;
+            return 0;
          }
       }
    }
+   return 1;
 }
 
 void CDCM6208_panelgui::Recalculate()
@@ -560,6 +643,12 @@ void CDCM6208_panelgui::UpdateGUI()
       m_LockStatus->SetLabel("NOT LOCKED");
       m_LockStatus->SetForegroundColour(wxColour("#ff0000"));
    }
+   m_Y0Y1_FREQ_req->Enable(int_care_mask&(1<<0));
+   m_Y2Y3_FREQ_req->Enable(int_care_mask&(1<<1));
+   m_Y4_FREQ_req->Enable(int_care_mask&(1<<2));
+   m_Y5_FREQ_req->Enable(int_care_mask&(1<<3));
+   m_Y6_FREQ_req->Enable(int_care_mask&(1<<4));
+   m_Y7_FREQ_req->Enable(int_care_mask&(1<<5));
 }
 
 void CDCM6208_panelgui::SolveFracDiv(double* target, Fractional_config* config, double* result)
@@ -630,5 +719,242 @@ void CDCM6208_panelgui::CalculateFracDiv(double* target, Fractional_config* conf
    else
    {
       *target = config->integer_part;
+   }
+}
+bool CDCM6208_panelgui::isInteger(double var)
+{
+   return (var==(int64_t)var);
+}
+
+double CDCM6208_panelgui::dec2frac(double target, int* num, int* den)
+{
+   //constant for CDCM6208
+   int max_num_bits = 18;
+   int max_den_bits = 14;
+   //
+   uint64_t l_num = *num;
+   uint64_t l_den = *den;
+   double l_target = target;
+   l_den = 1;
+   while(isInteger(target)==false)
+   {
+      l_den   *=10;
+      target *=10;
+   }
+   l_num=(uint64_t)target;
+   uint64_t gcd = findGCD(*num,l_den);
+   l_num/=gcd;
+   l_den/=gcd;
+   // find out how many bits are used by numerator and denominator
+   int num_bits, den_bits;
+   for(int i=0; i<64; i++)
+   {
+      if((l_num >> i) > 0)
+         num_bits = i;
+      if((l_den >> i) > 0)
+         den_bits = i;
+   }
+   //offset by one
+   num_bits++;
+   den_bits++;
+   // truncate if needed
+   while((num_bits > max_num_bits) || (den_bits > max_den_bits))
+   {
+      l_den = l_den >> 1;
+      l_num = l_num >> 1;
+      num_bits--;
+      den_bits--;
+   }
+
+   // Check if numerator value valid for CDCM6208
+   int placeholder;
+   while(SolveN((int*)&l_num,&placeholder,&placeholder) == 1)
+   {
+      l_den = l_den >> 1;
+      l_num = l_num >> 1;
+   }
+   // return values
+   *num = (int)l_num;
+   *den = (int)l_den;
+   double result_freq = *num/(double)*den;
+   return (abs(1-(l_target/result_freq)));
+}
+
+
+
+std::vector<VCO_config> CDCM6208_panelgui::FindValidVCOFreqs(double lcm, double VCOmin, double VCOmax)
+{
+   // find number of valid vco freqs for each prescaler
+   std::vector<VCO_config> Config_vector;
+   VCO_config placeholder_struct;
+   double lo_freq;
+   double hi_freq;
+   double frequency;
+   int l_have_error=0;
+   for (int prescaler=4; prescaler<=6; prescaler++)
+   {
+      //Find low and high bounds for current prescaler
+      lo_freq=VCOmin/prescaler;
+      hi_freq=VCOmax/prescaler;
+      frequency = ceil(lo_freq/lcm)*lcm;
+      while(frequency < hi_freq)
+      {
+            placeholder_struct.Prescaler = prescaler;
+            placeholder_struct.Frequency = frequency;
+            Config_vector.push_back(placeholder_struct);
+            frequency += lcm;
+      }
+   }
+   return Config_vector;
+}
+
+
+
+//Euclidean method for finding greatest common divisor
+uint64_t CDCM6208_panelgui::findGCD(uint64_t a, uint64_t b)
+{
+      if (b == 0)
+      return a;
+      return findGCD(b, a % b);
+}
+
+int CDCM6208_panelgui::findlownum(std::vector<VCO_config> &input)
+{
+   int min_nom = 0xFFFFFFF;
+   int index = 0;
+   int curr_val;
+   for(int i=0; i<input.size(); i++)
+   {
+      curr_val = input[i].Multiplier * input[i].Prescaler;
+      if(curr_val < min_nom)
+      {
+         min_nom = curr_val;
+         index = i;
+      }
+   }
+   return index;
+}
+
+int CDCM6208_panelgui::findlowerr(std::vector<VCO_config> &input)
+{
+   double min_err = 100e6;
+   int index = 0;
+   for(int i=0; i<input.size(); i++)
+   {
+      if(input[i].freq_error < min_err)
+      {
+         min_err = input[i].freq_error;
+         index = i;
+      }
+   }
+   return index;
+
+}
+
+int CDCM6208_panelgui::findbestconfig(std::vector<VCO_config> &input, int have_error)
+{
+   int no_error = input.size()-have_error;
+   // all configs have freq. errors
+   if(no_error==0)
+   {
+      return findlowerr(input);
+   }
+   // no configs have freq. errors
+   else if(have_error==0)
+   {
+      return findlownum(input);
+   }
+   else
+   {
+      for(int i=(input.size()-1);i>=0;i--)
+      {
+         if(input[i].freq_error > 0)
+            input.erase(input.begin()+i);
+      }
+      return findlownum(input);
+   }
+}
+
+VCO_config CDCM6208_panelgui::SolveFreqPlanSingleCDCM(Frequency_plan Frequency_plan, double VCOmin, double VCOmax)
+{
+   // make local variables
+   double l_Y0Y1       = Frequency_plan.Y0Y1_Frequency;
+   double l_Y2Y3       = Frequency_plan.Y2Y3_Frequency;
+   double l_Y4         = Frequency_plan.Y4_Frequency;
+   double l_Y5         = Frequency_plan.Y5_Frequency;
+   double l_Y6         = Frequency_plan.Y6_Frequency;
+   double l_Y7         = Frequency_plan.Y7_Frequency;
+   double l_Input_freq = Frequency_plan.Input_Frequency;
+   double l_VCOMin     = VCOmin;
+   double l_VCOMax     = VCOmax;
+   // Eliminate fractional parts by shifting left (if any)
+   int8_t shifts=0;
+   while(!(isInteger(l_Y0Y1)&&isInteger(l_Y2Y3)&&isInteger(l_VCOMin)&&isInteger(l_VCOMax)&&isInteger(l_Input_freq)))
+   {
+      shifts++;
+      l_Y0Y1      *=10;
+      l_Y2Y3      *=10;
+      l_VCOMin    *=10;
+      l_VCOMax    *=10;
+      l_Input_freq*=10;
+   }
+   //Find lowest common multiple
+   double int_gcd;
+   double int_lcm;
+   bool do_vco_calc=true;
+   if ((Frequency_plan.int_care_mask&3) == 1)
+   {
+      int_lcm=l_Y0Y1;
+   }
+   else if ((Frequency_plan.int_care_mask&3) == 2)
+   {
+      int_lcm=l_Y2Y3;
+   }
+   else if ((Frequency_plan.int_care_mask&3) == 3)
+   {
+      int_lcm=(l_Y0Y1*l_Y2Y3)/findGCD((uint64_t)l_Y0Y1,(uint64_t)l_Y2Y3);
+   }
+   else
+   {
+      do_vco_calc=false;
+   }
+   if(do_vco_calc)
+   {
+      // find number of valid vco freqs for each prescaler
+      std::vector<VCO_config> Config_vector;
+      Config_vector = FindValidVCOFreqs(int_lcm, l_VCOMin, l_VCOMax);
+
+      int have_error=0;
+      double Frequency;
+      for(int i = 0; i<Config_vector.size(); i++)
+      {
+         Frequency  = Config_vector[i].Frequency;
+         Config_vector[i].freq_error=dec2frac(Frequency/l_Input_freq,&(Config_vector[i].Multiplier),&(Config_vector[i].Divisor));
+         if(Config_vector[i].freq_error>0)
+            have_error++;
+      }
+
+
+      if(Config_vector.size() > 0)
+      {
+         // find index of best config
+         int best_index = findbestconfig(Config_vector,have_error);
+         return Config_vector[best_index];
+      }
+      else
+      {
+         //return empty struct if no config found
+         VCO_config emptystruct;
+         emptystruct.valid = false;
+         return emptystruct;
+      }
+   }
+   else
+   {
+      //return empty struct if no config found
+      //no algorithm for fractional only frequency planning
+      VCO_config emptystruct;
+      emptystruct.valid = false;
+      return emptystruct;
    }
 }
