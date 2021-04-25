@@ -17,7 +17,7 @@
 #include "fftviewer_frFFTviewer.h"
 #include "ADF4002_wxgui.h"
 #include "Si5351C_wxgui.h"
-#include "CDCM6208.h"
+#include "CDCM6208_framegui.h"
 #include "LMS_Programing_wxgui.h"
 #include "pnlMiniLog.h"
 #include "FPGAcontrols_wxgui.h"
@@ -127,7 +127,7 @@ LMS7SuiteAppFrame::LMS7SuiteAppFrame( wxWindow* parent ) :
     SetSize(x+8,y1+y2+8);
     m_scrolledWindow1->SetMinSize(wxSize(wxDefaultCoord,160));
     m_scrolledWindow1->SetMaxSize(wxSize(wxDefaultCoord,y1));
-    SetMinSize(wxSize(1280,960));
+    SetMinSize(wxSize(640,320));
     obj_ptr = this;
     wxCommandEvent event;
     OnControlBoardConnect(event);
@@ -338,7 +338,7 @@ void LMS7SuiteAppFrame::OnShowCDCM6208( wxCommandEvent& event )
    }
    else
    {
-      cdcmGUI = new CDCM6208(this);
+      cdcmGUI = new CDCM6208_framegui(this);
       cdcmGUI->Connect(wxEVT_CLOSE_WINDOW, wxCloseEventHandler(LMS7SuiteAppFrame::OnCDCM6208Close), NULL, this);
       cdcmGUI->Show();
       cdcmGUI->Initialize(lmsControl);

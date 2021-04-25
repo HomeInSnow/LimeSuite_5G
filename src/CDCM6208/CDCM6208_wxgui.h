@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version 3.9.0 Mar 22 2021)
+// C++ code generated with wxFormBuilder (version Oct 26 2018)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO *NOT* EDIT THIS FILE!
@@ -142,7 +142,7 @@ class CDCM_controlpanel : public wxPanel
 		wxTextCtrl* m_Y5_FREQ;
 		wxTextCtrl* m_Y5_FREQ_req;
 
-		// Virtual event handlers, override them in your derived class
+		// Virtual event handlers, overide them in your derived class
 		virtual void OnChange( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnRadio( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnChoice( wxCommandEvent& event ) { event.Skip(); }

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version 3.9.0 Mar 22 2021)
+// C++ code generated with wxFormBuilder (version Oct 26 2018)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO *NOT* EDIT THIS FILE!
@@ -7,7 +7,7 @@
 
 #include "CDCM6208_panelgui.h"
 
-#include "CDCM6208_GUI.h"
+#include "CDCM6208_wxgui.h"
 
 ///////////////////////////////////////////////////////////////////////////
 

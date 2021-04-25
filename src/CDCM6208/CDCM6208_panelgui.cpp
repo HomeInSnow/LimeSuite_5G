@@ -7,7 +7,7 @@ CDCM_controlpanel( parent )
 
 }
 
-CDCM6208_panelgui::   CDCM6208_panelgui( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style)
+CDCM6208_panelgui::CDCM6208_panelgui( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style)
 :
 CDCM_controlpanel(parent, id, pos, size, style), lmsControl(nullptr)
 {
@@ -90,7 +90,7 @@ void CDCM6208_panelgui::OnChange( wxCommandEvent& event )
          i_val = std::stoi(str);
          //N consists of two multipliers 8 bit and 10 bit
             // +1 offset intentional
-         int max_val = (1<<10) * (1<<8);
+         int max_val = (1<<10) * (1<<8); // theres no +1 offset though...
          if(i_val < 1)
             i_val = 1;
          else if(i_val > max_val)
@@ -144,7 +144,7 @@ void CDCM6208_panelgui::OnChange( wxCommandEvent& event )
          str = m_Y7_DIV->GetValue();
          d_val = std::stod(str);
          SolveFracDiv(&d_val, &Y7, &Y7_Divider);
-         Y7_Divider = d_val;
+         Y7_Divider = d_val; // Ahm, wtf is this?
       }
       else if (obj == m_Baseaddr)
       {
@@ -259,6 +259,7 @@ void CDCM6208_panelgui::OnFreqEntry( wxCommandEvent& event )
          m_FrequencyPlanRes->SetLabel("No Valid Config Found");
          m_FrequencyPlanRes->SetForegroundColour(wxColour("#ff0000"));
       }
+      
       // Update dividers
       Y0Y1_Divider=(int)round((VCOF/PrescalerA)/Frequency_plan.Y0Y1_Frequency);
       Y2Y3_Divider=(int)round((VCOF/PrescalerB)/Frequency_plan.Y2Y3_Frequency);
@@ -292,6 +293,7 @@ void CDCM6208_panelgui::onFP_chk( wxCommandEvent& event )
    int_care_mask |= (((int)m_Y7_chk->GetValue())<<5);
    UpdateGUI();
 }
+
 void CDCM6208_panelgui::OnButton( wxCommandEvent& event )
 {
    auto obj = event.GetEventObject();
@@ -384,7 +386,7 @@ void CDCM6208_panelgui::OnButton( wxCommandEvent& event )
       LMS_WriteFPGAReg(lmsControl,SPI_BASEADDR+21,regval);
       //GET CONFIG RESULT
       // Ask FPGA to retrieve CDCM register data
-      int timeout = 5;
+      uint8_t timeout = 5;
       LMS_WriteFPGAReg(lmsControl,SPI_BASEADDR+24,regval);
       while(regval != 2 && timeout > 0){
          LMS_ReadFPGAReg(lmsControl,SPI_BASEADDR+24,&regval);
@@ -401,7 +403,7 @@ void CDCM6208_panelgui::OnButton( wxCommandEvent& event )
    {
       //Request FPGA to read CDCM registers
       regval = 1;
-      int timeout = 5;
+      uint8_t timeout = 5;
       LMS_WriteFPGAReg(lmsControl,SPI_BASEADDR+24,regval);
       while(regval != 2 && timeout > 0){
          LMS_ReadFPGAReg(lmsControl,SPI_BASEADDR+24,&regval);
@@ -514,6 +516,7 @@ int CDCM6208_panelgui::SolveN(int* Target, int* Mult8bit, int* Mult10bit)
    return 1;
 }
 
+// TODO: this should not be needed, needs to be done internally.
 void CDCM6208_panelgui::Recalculate()
 {
    if(InMux==1)
