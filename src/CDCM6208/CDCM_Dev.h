@@ -96,5 +96,55 @@ private:
     int CDCM_Ver;
 };
 
+// TODO: this should not be needed, needs to be done internally.
+// TODO: taken out of GUI
+// void Recalculate()
+// {
+//    if(InMux==1)
+//       VCOF = PrimaryF/RDivider;
+//    else
+//       VCOF = SecondaryF;
+
+//    VCOF = VCOF / MDivider;
+//    VCOF = VCOF * PrescalerA;
+//    VCOF = VCOF * NMultiplier0 * NMultiplier1;
+
+//    Y0Y1_Frequency = (VCOF/PrescalerA)/Y0Y1_Divider;
+//    Y4_Frequency = (VCOF/PrescalerA)/Y4_Divider;
+//    Y5_Frequency = (VCOF/PrescalerA)/Y5_Divider;
+
+//    Y2Y3_Frequency = (VCOF/PrescalerB)/Y2Y3_Divider;
+//    Y6_Frequency = (VCOF/PrescalerB)/Y6_Divider;
+//    Y7_Frequency = (VCOF/PrescalerB)/Y7_Divider;
+// }
+
+
+// Taken out of GUI header
+// Other functions
+//    void Recalculate();
+//    // Finds a combination for getting desired N integer divider
+//    int SolveN(int* Target, int* Mult8bit, int* Mult10bit);
+//    // Find a configuration to implement requested target fractional divider
+//    void SolveFracDiv(double* target, Fractional_config* config, double* result);
+//    // Calculate fractional divider value from configuration structure
+//    void CalculateFracDiv(double* target, Fractional_config* config);
+//    // Find a VCO config for specified frequency plan
+//    VCO_config SolveFreqPlanSingleCDCM(Frequency_plan Frequency_plan,  double VCOmin, double VCOmax);
+//    // Find valid VCO freqs with specified lcm value
+//    std::vector<VCO_config> FindValidVCOFreqs(double lcm, double VCOmin, double VCOmax);
+//    // Check if float has no fractional part
+//    bool isInteger(double var);
+//    // Find Greatest common denominator
+//    uint64_t findGCD(uint64_t a, uint64_t b);
+//    // convert decimal fraction (double) to num/den format fraction,
+//    // truncate if needed
+//    double dec2frac(double target, int* num, int* den);
+//    // return index of VCO config with lowest multiplier
+//    int findlownum(std::vector<VCO_config> &input);
+//    // return index of best vco config
+//    int findbestconfig(std::vector<VCO_config> &input, int have_error);
+//    // return index of VCO config with lowest error
+//    int findlowerr(std::vector<VCO_config> &input);
+
 }
 #endif // CDCM_DEV_H
