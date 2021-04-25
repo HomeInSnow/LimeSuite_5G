@@ -19,8 +19,8 @@ CDCM6208_CONTROL(parent,id,title,pos,size,style), device(nullptr)
 void CDCM6208_framegui::Initialize(lms_device_t* dev)
 {
     device = dev;
-    CDCM6208_framegui::m_CDCM1->SPI_BASEADDR=288;
+    //CDCM6208_framegui::m_CDCM1->SPI_BASEADDR=288;
     CDCM6208_framegui::m_CDCM1->Initialize(device);
-    CDCM6208_framegui::m_CDCM2->SPI_BASEADDR=320;
+    //CDCM6208_framegui::m_CDCM2->SPI_BASEADDR=320;
     CDCM6208_framegui::m_CDCM2->Initialize(device);
 }
