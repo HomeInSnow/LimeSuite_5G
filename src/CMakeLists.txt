@@ -62,7 +62,7 @@ set(LIME_SUITE_SOURCES
     protocols/Streamer.cpp
     protocols/ConnectionImages.cpp
     Si5351C/Si5351C.cpp
-    CDCM6208/CDCM_Dev.cpp
+    CDCM6208/CDCM6208_Dev.cpp
     ${PROJECT_SOURCE_DIR}/external/kissFFT/kiss_fft.c
     API/lms7_api.cpp
     API/lms7_device.cpp
