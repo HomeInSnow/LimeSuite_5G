@@ -57,8 +57,7 @@ LMS7_Device* LMS7_Device::CreateDevice(const lime::ConnectionHandle& handle, LMS
     if (info.deviceName ==  lime::GetDeviceName(lime::LMS_DEV_LIMESDRMINI))
         device = new LMS7_LimeSDR_mini(conn,obj);
     else if (info.deviceName == lime::GetDeviceName(lime::LMS_DEV_LIMESDR_QPCIE))
-        //device = new LMS7_qLimeSDR(conn,obj); //FIXME: Return this to qLimeSDR after GW change
-        device = new LMS7_LimeSDR_5GRadio(conn, obj);
+        device = new LMS7_qLimeSDR(conn, obj);
     else if (info.deviceName == lime::GetDeviceName(lime::LMS_DEV_LIMESDR_PCIE))
         device = new LMS7_LimeSDR_PCIE(conn,obj);
     else if (info.deviceName == lime::GetDeviceName(lime::LMS_DEV_LIMENET_MICRO))
