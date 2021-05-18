@@ -28,7 +28,16 @@ void fftviewer_frFFTviewer::Initialize(lms_device_t* pDataPort)
     }
     cmbStreamType->Clear();
     const int num_ch = LMS_GetNumChannels(lmsControl, false);
-    if (num_ch>2)
+    if(num_ch > 5)
+    {
+        cmbStreamType->Append(_T("LMS1 SISO"));
+        cmbStreamType->Append(_T("LMS1 MIMO"));
+        cmbStreamType->Append(_T("LMS2 SISO"));
+        cmbStreamType->Append(_T("LMS2 MIMO"));
+        cmbStreamType->Append(_T("LMS3 SISO"));
+        cmbStreamType->Append(_T("LMS3 MIMO"));
+    }
+    else if (num_ch > 2)
     {
         cmbStreamType->Append(_T("LMS1 SISO"));
         cmbStreamType->Append(_T("LMS1 MIMO"));
@@ -399,8 +408,8 @@ void fftviewer_frFFTviewer::StreamingLoop(fftviewer_frFFTviewer* pthis, const un
             captureBuffer[ch].resize(samplesToCapture[ch]);
             samplesCaptured[ch] = 0;
         }
-
-    if (LMS_GetNumChannels(pthis->lmsControl, false)>2)
+    int num_ch = LMS_GetNumChannels(pthis->lmsControl, false);
+    if (num_ch>2)
         ch_offset += 2*pthis->lmsIndex;
 
     auto fmt = pthis->cmbFmt->GetSelection() == 1 ? lms_stream_t::LMS_FMT_I16 : lms_stream_t::LMS_FMT_I12;

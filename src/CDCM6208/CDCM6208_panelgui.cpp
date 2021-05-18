@@ -181,11 +181,11 @@ void CDCM6208_panelgui::OnRadio( wxCommandEvent& event )
    SecondarySel = m_SecondarySel->GetValue();
 
    if(PrimarySel && !SecondarySel)
-      CDCM->SelectInput(1);
+      CDCM->SetVCOInput(1);
    else if(!PrimarySel && SecondarySel)
-      CDCM->SelectInput(2);
+      CDCM->SetVCOInput(2);
    else
-      CDCM->SelectInput(1);
+      CDCM->SetVCOInput(1);
    
    //Recalculate();
    UpdateGUI();

@@ -19,11 +19,11 @@ LMS7_LimeSDR_5GRadio::LMS7_LimeSDR_5GRadio(lime::IConnection* conn, LMS7_Device 
     tx_channels.resize(GetNumChannels());
     rx_channels.resize(GetNumChannels());
 
-    while (lms_list.size() < 2)
+    while (lms_list.size() < 3)
         lms_list.push_back(new lime::LMS7002M());
 
     fpga->SetConnection(conn);
-    for (unsigned i = 0; i < 2; i++)
+    for (unsigned i = 0; i < 3; i++)
     {
         this->lms_list[i]->SetConnection(conn, i);
         lms_list[i]->SetReferenceClk_SX(false, 30.72e6);
@@ -34,7 +34,7 @@ LMS7_LimeSDR_5GRadio::LMS7_LimeSDR_5GRadio(lime::IConnection* conn, LMS7_Device 
 
 unsigned LMS7_LimeSDR_5GRadio::GetNumChannels(const bool tx) const
 {
-    return 4;
+    return 6;
 }
 
 int LMS7_LimeSDR_5GRadio::EnableChannel(bool dir_tx, unsigned chan, bool enabled)
@@ -45,7 +45,7 @@ int LMS7_LimeSDR_5GRadio::EnableChannel(bool dir_tx, unsigned chan, bool enabled
 int LMS7_LimeSDR_5GRadio::SetRate(double f_Hz, int oversample)
 {
     double nco_f=0;
-    for (unsigned i = 0; i < GetNumChannels(false);i++)
+    for (unsigned i = 0; i < 2; i++)
     {
          if (rx_channels[i].cF_offset_nco > nco_f)
              nco_f = rx_channels[i].cF_offset_nco;
@@ -95,7 +95,7 @@ int LMS7_LimeSDR_5GRadio::SetRate(double f_Hz, int oversample)
     if (SetFPGAInterfaceFreq(decim, decim)!=0)
         return -1;
 
-    for (unsigned i = 0; i < GetNumChannels();i++)
+    for (unsigned i = 0; i < GetNumChannels(); i++)
     {
         if (rx_channels[i].cF_offset_nco != 0)
            SetNCOFreq(false, i, 0, rx_channels[i].cF_offset_nco);
@@ -130,7 +130,7 @@ int LMS7_LimeSDR_5GRadio::SetRate(bool tx, double f_Hz, unsigned oversample)
 
     lime::LMS7002M* lms = lms_list[0];
 
-    for (unsigned i = 0; i < GetNumChannels();i++)
+    for (unsigned i = 0; i < 2; i++)
     {
         if (rx_channels[i].cF_offset_nco > nco_rx)
             nco_rx = rx_channels[i].cF_offset_nco;
@@ -357,7 +357,7 @@ int LMS7_LimeSDR_5GRadio::SetRate(bool tx, double f_Hz, unsigned oversample)
     if (SetFPGAInterfaceFreq(interpolation, decimation)!=0)
         return -1;
 
-    for (unsigned i = 0; i < GetNumChannels();i++)
+    for (unsigned i = 0; i < GetNumChannels(); i++)
     {
         if (rx_channels[i].cF_offset_nco != 0)
            SetNCOFreq(false, i, 0, rx_channels[i].cF_offset_nco);
@@ -374,11 +374,15 @@ int LMS7_LimeSDR_5GRadio::SetRate(bool tx, double f_Hz, unsigned oversample)
 
 int LMS7_LimeSDR_5GRadio::SetRate(unsigned ch, double rxRate, double txRate, unsigned oversample)
 {
+    if(ch > 1)
+        return 0;
     return LMS7_Device::SetRate(ch,rxRate,txRate,oversample);
 }
 
 double LMS7_LimeSDR_5GRadio::GetRate(bool tx, unsigned chan, double *rf_rate_Hz) const
 {
+    if(chan > 1)
+        return 30.72e6;
     return LMS7_Device::GetRate(tx, chan, rf_rate_Hz);
 }
 

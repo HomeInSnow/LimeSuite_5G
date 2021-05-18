@@ -22,7 +22,7 @@ CDCM_Dev::CDCM_Dev(FPGA* fpga, uint16_t SPI_BASE_ADDR):
 void CDCM_Dev::SetPrimaryFreq(double freq)
 {
    VCO.prim_freq = freq;
-   if(GetInput() == 0)
+   if(GetVCOInput() == 0)
       UpdateOutputFrequencies();
 }
 
@@ -42,7 +42,7 @@ double CDCM_Dev::GetPrimaryFreq()
 void CDCM_Dev::SetSecondaryFreq(double freq)
 {
    VCO.sec_freq = freq;
-   if(GetInput() == 1)
+   if(GetVCOInput() == 1)
       UpdateOutputFrequencies();
 }
 
@@ -61,7 +61,7 @@ double CDCM_Dev::GetSecondaryFreq()
 */
 double CDCM_Dev::GetInputFreq()
 {
-   if(GetInput() == 1)
+   if(GetVCOInput() == 1)
       return VCO.prim_freq/VCO.R_div;
    else
       return VCO.sec_freq;
@@ -71,7 +71,7 @@ double CDCM_Dev::GetInputFreq()
 	@brief Selects VCO input
 	@param input 1 - primary, 0 - secondary 
 */
-void CDCM_Dev::SelectInput(int input)
+void CDCM_Dev::SetVCOInput(int input)
 {
    VCO.input_mux = input; 
    UpdateOutputFrequencies();
@@ -81,7 +81,7 @@ void CDCM_Dev::SelectInput(int input)
 	@brief Returns which VCO input is selected
 	@return 1 - primary, 0 - secondary 
 */
-int CDCM_Dev::GetInput()
+int CDCM_Dev::GetVCOInput()
 {
     return VCO.input_mux;
 }
@@ -564,7 +564,7 @@ int CDCM_Dev::DownloadConfiguration()
 /** 
 	@brief Finds fractional dividers integer and fractional parts values
    @param target requested fractional divider target
-   @param[in] Output Ouput to which fractional divider value is found
+   @param[out] Output Ouput to which fractional divider value is found
    @return Found divider value
 */
 double CDCM_Dev::SolveFracDiv(double target, CDCM_Output *Output)
@@ -628,8 +628,8 @@ double CDCM_Dev::SolveFracDiv(double target, CDCM_Output *Output)
 /** 
 	@brief Finds 8bit and 10bit multiplier values
    @param Target requested fractional divider target
-   @param[in] Mult8bit 8bit Multiplier value
-   @param[in] Mult10bit 10bit Multiplier value
+   @param[out] Mult8bit 8bit Multiplier value
+   @param[out] Mult10bit 10bit Multiplier value
    @return 0 on success, -1 on failure
 */
 int CDCM_Dev::SolveN(int Target, int* Mult8bit, int* Mult10bit)
@@ -721,8 +721,8 @@ int CDCM_Dev::PrepareToReadRegs()
 /** 
 	@brief Calculates numerator/denumenator values from decimal
    @param decimal decimal value
-   @param[in] num numerator value
-   @param[in] den denumenator value
+   @param[out] num numerator value
+   @param[out] den denumenator value
    @return error value after conversion
 */
 double CDCM_Dev::DecToFrac(double decimal, int* num, int* den)
@@ -730,10 +730,10 @@ double CDCM_Dev::DecToFrac(double decimal, int* num, int* den)
    //constant for CDCM6208
    const int max_num_bits = 18;
    const int max_den_bits = 14;
-   uint64_t l_num = *num;
-   uint64_t l_den = *den;
+   uint64_t l_num = 1;
+   uint64_t l_den = 1;
    double l_target = decimal;
-   l_den = 1;
+
    while(IsInteger(decimal)==false)
    {
       l_den  *=10;
@@ -917,15 +917,15 @@ CDCM_VCO CDCM_Dev::FindVCOConfig()
    double l_Y5         = Outputs.Y5.used ? Outputs.Y5.requested_freq : Outputs.Y5.output_freq;
    double l_Y6         = Outputs.Y6.used ? Outputs.Y6.requested_freq : Outputs.Y6.output_freq;
    double l_Y7         = Outputs.Y7.used ? Outputs.Y7.requested_freq : Outputs.Y7.output_freq;
-   double l_Input_freq = GetInputFreq();
-   
+   double input_shift = 1;
    
    // Eliminate fractional parts by shifting left (if any)
-   while(!(IsInteger(l_Y0Y1)&&IsInteger(l_Y2Y3)&&IsInteger(l_Input_freq)))
+   // TODO: bug here due to l_Y2Y3 being a float and whole thing gets shifted
+   while(!(IsInteger(l_Y0Y1)&&IsInteger(l_Y2Y3)))
    {
       l_Y0Y1      *=10;
       l_Y2Y3      *=10;
-      l_Input_freq*=10;
+      input_shift *=10;
    }
    
    //Find lowest common multiple
@@ -948,12 +948,28 @@ CDCM_VCO CDCM_Dev::FindVCOConfig()
       std::vector<CDCM_VCO> Config_vector;
       Config_vector = FindValidVCOFreqs(int_lcm);
 
-      int have_error=0;
-      double Frequency;
-      for(int i = 0; i<Config_vector.size(); i++)
-      {
-         Frequency  = Config_vector[i].output_freq;
-         Config_vector[i].freq_err=DecToFrac(Frequency/l_Input_freq,&(Config_vector[i].N_mul_full),&(Config_vector[i].M_div));
+      int have_error = 0;
+      int max_r_div = GetVCOInput() ? 16:1;
+
+      for(int i = 0; i < Config_vector.size(); i++)
+      {  
+         double min_err = std::numeric_limits<double>::max();
+
+         for(int r_div = 1; r_div <= max_r_div; r_div++)
+         {
+            double input_freq = ((GetVCOInput() ? VCO.prim_freq : VCO.sec_freq) / r_div)*input_shift;
+            int n_mul = 1, m_div = 1;
+            
+            Config_vector[i].freq_err=DecToFrac(Config_vector[i].output_freq/input_freq, &n_mul, &m_div);
+
+            if(min_err > Config_vector[i].freq_err)
+            {
+               min_err = Config_vector[i].freq_err;
+               Config_vector[i].R_div = r_div;
+               Config_vector[i].N_mul_full = n_mul;
+               Config_vector[i].M_div = m_div;
+            }
+         }
          
          if(Config_vector[i].freq_err>0)
             have_error++;

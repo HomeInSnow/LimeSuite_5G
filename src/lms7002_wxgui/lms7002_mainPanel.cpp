@@ -161,12 +161,29 @@ void lms7002_mainPanel::Initialize(lms_device_t* pControl)
     mTabMCU->Initialize(lmsControl);
     mTabR3->Initialize(lmsControl);
     ((LMS7_Device*)lmsControl)->SetActiveChip(0);
-    cmbLmsDevice->SetSelection(0);
+    cmbLmsDevice->Clear();
 
-    if (((LMS7_Device*)lmsControl)->GetNumChannels() > 2)
+    if (((LMS7_Device*)lmsControl)->GetNumChannels() > 5)
+    {
+        cmbLmsDevice->Append( wxT("LMS 1") );
+        cmbLmsDevice->Append( wxT("LMS 2") );
+        cmbLmsDevice->Append( wxT("LMS 3") );
         cmbLmsDevice->Show();
-    else
+    }
+    else if (((LMS7_Device*)lmsControl)->GetNumChannels() > 2)
+    {
+        
+        cmbLmsDevice->Append( wxT("LMS 1") );
+        cmbLmsDevice->Append( wxT("LMS 2") );
+        cmbLmsDevice->Show();
+    } 
+    else 
+    {
+        cmbLmsDevice->Append( wxT("LMS 1") );
         cmbLmsDevice->Hide();
+    }
+
+    cmbLmsDevice->SetSelection( 0 );
     rbChannelA->SetValue(true);
     rbChannelB->SetValue(false);
     UpdateGUI();

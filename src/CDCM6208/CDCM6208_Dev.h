@@ -92,8 +92,8 @@ public:
     void SetVCO(CDCM_VCO VCO);
     CDCM_VCO GetVCO();
     int RecalculateVCO();
-    void SelectInput(int input);
-    int GetInput();
+    void SetVCOInput(int input);
+    int GetVCOInput();
     double GetInputFreq();
     void SetPrimaryFreq(double freq);
     double GetPrimaryFreq();
