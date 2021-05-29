@@ -15,6 +15,7 @@
 #include "IConnection.h"
 
 class RFE_Device;
+class CDCM_Dev;
 
 namespace lime
 {
@@ -101,6 +102,7 @@ public:
     RFE_Device* GetLimeRFE() const;
     void SetLimeRFE(RFE_Device* dev);
 
+    virtual CDCM_Dev* GetCDCMDev(int index) const;
 protected:
 
     struct ChannelInfo

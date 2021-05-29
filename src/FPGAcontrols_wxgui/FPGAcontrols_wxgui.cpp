@@ -62,10 +62,7 @@ FPGAcontrols_wxgui::FPGAcontrols_wxgui(wxWindow* parent,wxWindowID id,const wxSt
     FlexGridSizer1 = new wxFlexGridSizer(0, 1, 5, 5);
     FlexGridSizer1->AddGrowableCol(0);
     cmbDevice = new wxChoice(this, wxNewId(), wxDefaultPosition, wxDefaultSize, 0, 0, 0, wxDefaultValidator, _T("ID_CHOICE"));
-    cmbDevice->Append(_T("LMS1"));
-    cmbDevice->Append(_T("LMS2"));
-    cmbDevice->Append(_T("ADC/DAC"));
-    cmbDevice->SetSelection(0);
+    
     FlexGridSizer1->Add(cmbDevice, 1, wxEXPAND | wxALIGN_LEFT | wxALIGN_TOP, 5);
     mode = new wxChoice(this, wxNewId(), wxDefaultPosition, wxDefaultSize, 0, 0, 0, wxDefaultValidator, _T("ID_CHOICE"));
 
@@ -123,14 +120,32 @@ void FPGAcontrols_wxgui::Initialize(lms_device_t* dataPort)
 {
     lmsControl = dataPort;
     int numCh = LMS_GetNumChannels(lmsControl,LMS_CH_TX);
-    if ( numCh > 2)
-        cmbDevice->Show();
-    else
-        cmbDevice->Hide();
 
+    cmbDevice->Clear();
+    if (numCh == 6)
+    {
+        cmbDevice->Append(_T("LMS1"));
+        cmbDevice->Append(_T("LMS2"));
+        cmbDevice->Show();
+    } 
+    else if (numCh > 2)
+    {
+        cmbDevice->Append(_T("LMS1"));
+        cmbDevice->Append(_T("LMS2"));
+        cmbDevice->Append(_T("ADC/DAC"));
+        cmbDevice->Show();
+    } 
+    else 
+    {
+        cmbDevice->Append(_T("LMS1"));
+        cmbDevice->Hide();
+    }
+
+    cmbDevice->SetSelection(0);
+    
     mode->Clear();
     mode->SetSelection(mode->Append(_T("Stream Mode")));
-    if (numCh != 1)
+    if (numCh != 1 && numCh != 6)
         mode->SetSelection(mode->Append(_T("WFM Mode")));
     wxCommandEvent evt;
     OnModeChanged(evt);

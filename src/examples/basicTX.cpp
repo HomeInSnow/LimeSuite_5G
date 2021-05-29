@@ -43,11 +43,11 @@ int main(int argc, char** argv)
     //Initialize device with default configuration
     //Do not use if you want to keep existing configuration
     //Use LMS_LoadConfig(device, "/path/to/file.ini") to load config from INI
-    if (LMS_LoadConfig(device, "/home/limelt/test.ini"))
-	error();
+    // if (LMS_LoadConfig(device, "/home/limelt/test.ini"))
+	// error();
     /*if (LMS_Init(device)!=0)
         error();
-
+    
     //Enable TX channel,Channels are numbered starting at 0
     if (LMS_EnableChannel(device, LMS_CH_TX, 0, true)!=0)
         error();
@@ -108,15 +108,29 @@ int main(int argc, char** argv)
     const int send_cnt = int(buffer_size*f_ratio) / f_ratio; 
     cout << "sample count per send call: " << send_cnt << std::endl;
 
-    LMS_StartStream(&tx_stream);         //Start streaming
+    //Initialize stream
+    // TODO: Tomas, RX needed to start TX? Also, TX data rate is double the RX one even when sampling rate is same
+    lms_stream_t streamId; //stream structure
+    streamId.channel = 2; //channel number
+    streamId.fifoSize = 1024 * 1024; //fifo size in samples
+    streamId.throughputVsLatency = 1.0; //optimize for max throughput
+    streamId.isTx = false; //RX channel
+    streamId.dataFmt = lms_stream_t::LMS_FMT_I12; //12-bit integers
+    if (LMS_SetupStream(device, &streamId) != 0)
+        error();
+
+    //Start streaming
+    LMS_StartStream(&streamId);
+
+    LMS_StartStream(&tx_stream2);         //Start streaming
     //LMS_StartStream(&tx_stream2);         //Start streaming
     //Streaming
     auto t1 = chrono::high_resolution_clock::now();
     auto t2 = t1;
-    while (chrono::high_resolution_clock::now() - t1 < chrono::seconds(100)) //run for 10 seconds
+    while (chrono::high_resolution_clock::now() - t1 < chrono::seconds(10)) //run for 10 seconds
     {
         //Transmit samples
-        int ret = LMS_SendStream(&tx_stream, tx_buffer, send_cnt, nullptr, 1000);
+        int ret = LMS_SendStream(&tx_stream2, tx_buffer, send_cnt, nullptr, 1000);
         if (ret != send_cnt)
             cout << "error tx1: samples sent: " << ret << "/" << send_cnt << endl;
         //Transmit samples

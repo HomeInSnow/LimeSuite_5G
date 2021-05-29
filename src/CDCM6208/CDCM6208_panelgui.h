@@ -20,11 +20,11 @@ public:
    ~CDCM6208_panelgui();
 	//// end generated class members
    CDCM6208_panelgui( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style);
-   void Initialize(lms_device_t* pModule, uint16_t SPI_BASE_ADDR);
+   void Initialize(CDCM_Dev* cdcm);
    void UpdateGUI();
 
-   double primaryFrequency = 30.72*1e6;
-   double secondaryFrequency = 30.72*1e6;
+   double primaryFreq = 30.72*1e6;
+   double secondaryFreq = 30.72*1e6;
 
 protected:
    CDCM_Dev* CDCM;

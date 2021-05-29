@@ -1910,4 +1910,9 @@ void LMS7_Device::SetLimeRFE(RFE_Device* dev)
     limeRFE = dev;
 }
 
+CDCM_Dev* LMS7_Device::GetCDCMDev(int index) const
+{
+    return nullptr;
+}
+
 }//namespace lime

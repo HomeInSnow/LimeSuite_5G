@@ -223,7 +223,7 @@ CDCM_controlpanel::CDCM_controlpanel( wxWindow* parent, wxWindowID id, const wxP
 	Misc = new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, wxT("Misc") ), wxVERTICAL );
 
 	wxFlexGridSizer* fgSizer12;
-	fgSizer12 = new wxFlexGridSizer( 0, 6, 0, 0 );
+	fgSizer12 = new wxFlexGridSizer( 0, 7, 0, 0 );
 	fgSizer12->SetFlexibleDirection( wxBOTH );
 	fgSizer12->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 
@@ -315,6 +315,18 @@ CDCM_controlpanel::CDCM_controlpanel( wxWindow* parent, wxWindowID id, const wxP
 
 
 	fgSizer12->Add( bSizer11, 1, wxEXPAND, 5 );
+
+	wxBoxSizer* bSizer101;
+	bSizer101 = new wxBoxSizer( wxVERTICAL );
+
+
+	bSizer101->Add( 0, 0, 1, wxEXPAND, 5 );
+
+	m_Reset = new wxButton( Misc->GetStaticBox(), wxID_ANY, wxT("Reset"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer101->Add( m_Reset, 0, wxALL, 5 );
+
+
+	fgSizer12->Add( bSizer101, 1, wxEXPAND, 5 );
 
 
 	Misc->Add( fgSizer12, 1, wxEXPAND, 5 );
@@ -724,6 +736,7 @@ CDCM_controlpanel::CDCM_controlpanel( wxWindow* parent, wxWindowID id, const wxP
 	m_Baseaddr->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
 	m_WriteAll->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( CDCM_controlpanel::OnButton ), NULL, this );
 	m_ReadAll->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( CDCM_controlpanel::OnButton ), NULL, this );
+	m_Reset->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( CDCM_controlpanel::OnButton ), NULL, this );
 	m_Y0Y1_chk->Connect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( CDCM_controlpanel::onFP_chk ), NULL, this );
 	m_Y2Y3_chk->Connect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( CDCM_controlpanel::onFP_chk ), NULL, this );
 	m_Y4_chk->Connect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( CDCM_controlpanel::onFP_chk ), NULL, this );
@@ -755,6 +768,7 @@ CDCM_controlpanel::~CDCM_controlpanel()
 	m_Baseaddr->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( CDCM_controlpanel::OnChange ), NULL, this );
 	m_WriteAll->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( CDCM_controlpanel::OnButton ), NULL, this );
 	m_ReadAll->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( CDCM_controlpanel::OnButton ), NULL, this );
+	m_Reset->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( CDCM_controlpanel::OnButton ), NULL, this );
 	m_Y0Y1_chk->Disconnect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( CDCM_controlpanel::onFP_chk ), NULL, this );
 	m_Y2Y3_chk->Disconnect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( CDCM_controlpanel::onFP_chk ), NULL, this );
 	m_Y4_chk->Disconnect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( CDCM_controlpanel::onFP_chk ), NULL, this );

@@ -1,12 +1,6 @@
-/*
- * File:   LimeSDR_5G.cpp
- * Author: Ricardas G
- *
- * Created on April 22, 2021
- */
 #include "LimeSDR_5GRadio.h"
 
-#include "FPGA_Q.h"
+#include "FPGA_5G.h"
 #include "Logger.h"
 #include "device_constants.h"
 
@@ -15,7 +9,10 @@ namespace lime
 
 LMS7_LimeSDR_5GRadio::LMS7_LimeSDR_5GRadio(lime::IConnection* conn, LMS7_Device *obj) : LMS7_Device(obj)
 {
-    fpga = new lime::FPGA_Q();
+    fpga = new lime::FPGA_5G();
+    cdcm[0] = new CDCM_Dev(fpga, CDCM1_BASE_ADDR);
+    cdcm[1] = new CDCM_Dev(fpga, CDCM2_BASE_ADDR);
+
     tx_channels.resize(GetNumChannels());
     rx_channels.resize(GetNumChannels());
 
@@ -23,6 +20,9 @@ LMS7_LimeSDR_5GRadio::LMS7_LimeSDR_5GRadio(lime::IConnection* conn, LMS7_Device 
         lms_list.push_back(new lime::LMS7002M());
 
     fpga->SetConnection(conn);
+    cdcm[0]->Init(30.72e6, 30.72e6);
+    cdcm[1]->Init(30.72e6, 30.72e6);
+
     for (unsigned i = 0; i < 3; i++)
     {
         this->lms_list[i]->SetConnection(conn, i);
@@ -32,14 +32,17 @@ LMS7_LimeSDR_5GRadio::LMS7_LimeSDR_5GRadio(lime::IConnection* conn, LMS7_Device 
     connection = conn;
 }
 
+int LMS7_LimeSDR_5GRadio::Init()
+{
+    if(cdcm[0]->Reset(30.72e6, 30.72e6) != 0 
+    || cdcm[1]->Reset(30.72e6, 30.72e6) != 0)
+        return -1;
+    return LMS7_Device::Init();
+}
+
 unsigned LMS7_LimeSDR_5GRadio::GetNumChannels(const bool tx) const
 {
     return 6;
-}
-
-int LMS7_LimeSDR_5GRadio::EnableChannel(bool dir_tx, unsigned chan, bool enabled)
-{
-    return LMS7_Device::EnableChannel(dir_tx,chan,enabled);
 }
 
 int LMS7_LimeSDR_5GRadio::SetRate(double f_Hz, int oversample)
@@ -374,16 +377,52 @@ int LMS7_LimeSDR_5GRadio::SetRate(bool tx, double f_Hz, unsigned oversample)
 
 int LMS7_LimeSDR_5GRadio::SetRate(unsigned ch, double rxRate, double txRate, unsigned oversample)
 {
-    if(ch > 1)
-        return 0;
+    if(ch > 3)
+    {
+        cdcm_output_t rx_output = ch == 4 ?  CDCM_Y6 : CDCM_Y7;
+        return cdcm[1]->SetFrequency(rx_output, rxRate, true);
+    }
+    else if (ch > 1)
+    {
+        cdcm_output_t rx_output = ch == 2 ?  CDCM_Y4 : CDCM_Y5;
+        cdcm_output_t tx_output = CDCM_Y0Y1;
+        if(cdcm[1]->SetFrequency(tx_output, txRate, false) != 0)
+            return -1;
+        return cdcm[1]->SetFrequency(rx_output, rxRate, true);
+    }
     return LMS7_Device::SetRate(ch,rxRate,txRate,oversample);
 }
 
 double LMS7_LimeSDR_5GRadio::GetRate(bool tx, unsigned chan, double *rf_rate_Hz) const
 {
-    if(chan > 1)
-        return 30.72e6;
+    if(chan > 3)
+    {
+        if(tx)
+            return 0;
+        cdcm_output_t rx_output = chan == 4 ?  CDCM_Y6 : CDCM_Y7;
+        return cdcm[1]->GetFrequency(rx_output);
+    }
+    else if (chan > 1)
+    {
+        cdcm_output_t output;
+        if(tx)
+            output = CDCM_Y0Y1;
+        else
+            output = chan == 2 ? CDCM_Y4 : CDCM_Y5;
+        return cdcm[1]->GetFrequency(output);
+    }
+    
     return LMS7_Device::GetRate(tx, chan, rf_rate_Hz);
+}
+
+CDCM_Dev* LMS7_LimeSDR_5GRadio::GetCDCMDev(int index) const
+{
+    if(index == 0)
+        return cdcm[0];
+    else if(index == 1)
+        return cdcm[1];
+    else
+        return nullptr;
 }
 
 } //namespace lime

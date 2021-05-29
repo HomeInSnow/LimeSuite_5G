@@ -77,6 +77,7 @@ set(LIME_SUITE_SOURCES
     FPGA_common/FPGA_common.cpp
     FPGA_common/FPGA_Mini.cpp
     FPGA_common/FPGA_Q.cpp
+    FPGA_common/FPGA_5G.cpp
     windowFunction.cpp
     threadHelper/threadHelper.cpp
 )

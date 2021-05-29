@@ -3,8 +3,6 @@
 #include "LimeSuiteConfig.h"
 #include "FPGA_common.h"
 
-namespace lime {
-
 #define CDCM_VCO_MIN_V1 2390*1e6
 #define CDCM_VCO_MAX_V1 2550*1e6
 #define CDCM_VCO_MIN_V2 2940*1e6
@@ -16,12 +14,12 @@ namespace lime {
 
 typedef enum
 {
-    CDCM_Y0Y1 = 0,
-    CDCM_Y2Y3,
-    CDCM_Y4,
-    CDCM_Y5,
-    CDCM_Y6,
-    CDCM_Y7
+    CDCM_Y0Y1 = 0,  // integer LMS2_DAC1 LMS2_DAC2
+    CDCM_Y2Y3,      // integer LMS2_DAC1 LMS2_DAC2 (unused)
+    CDCM_Y4,        // fractional LMS2_ADC1
+    CDCM_Y5,        // fractional LMS2_ADC2
+    CDCM_Y6,        // fractional LMS3_ADC1
+    CDCM_Y7         // fractional LMS3_ADC2
 }cdcm_output_t;
 
 struct CDCM_VCO
@@ -71,36 +69,37 @@ struct CDCM_Output
 
 struct CDCM_Outputs
 {
-    CDCM_Output Y0Y1 = {false, false, 0, 0, 0, 0}; // integer LMS2_DAC1 LMS2_DAC2
-    CDCM_Output Y2Y3 = {false, false, 0, 0, 0, 0}; // integer LMS2_DAC1 LMS2_DAC2 (unused)
-    CDCM_Output Y4 = {false, false, 0, 0, 0, 0};  // fractional LMS2_ADC1
-    CDCM_Output Y5 = {false, false, 0, 0, 0, 0};  // fractional LMS2_ADC2
-    CDCM_Output Y6 = {false, false, 0, 0, 0, 0};  // fractional LMS3_ADC1
-    CDCM_Output Y7 = {false, false, 0, 0, 0, 0};  // fractional LMS3_ADC2
+    CDCM_Output Y0Y1 = {false, false, 0, 0, 0, 0, 30.72e6, 0}; 
+    CDCM_Output Y2Y3 = {false, false, 0, 0, 0, 0, 30.72e6, 0};
+    CDCM_Output Y4 = {false, false, 0, 0, 0, 0, 30.72e6, 0}; 
+    CDCM_Output Y5 = {false, false, 0, 0, 0, 0, 30.72e6, 0}; 
+    CDCM_Output Y6 = {false, false, 0, 0, 0, 0, 30.72e6, 0}; 
+    CDCM_Output Y7 = {false, false, 0, 0, 0, 0, 30.72e6, 0}; 
 };
 
 class LIME_API CDCM_Dev
 {
 public:
-    CDCM_Dev(){};
     CDCM_Dev(lime::FPGA* fpga, uint16_t SPI_BASE_ADDR);
     
+    int Init(double primaryFreq, double secondaryFreq);
+    int Reset(double primaryFreq, double secondaryFreq);
 
     int SetFrequency(cdcm_output_t output, double frequency, bool upload = true);
     double GetFrequency(cdcm_output_t output);
 
-    void SetVCO(CDCM_VCO VCO);
-    CDCM_VCO GetVCO();
-    int RecalculateVCO();
-    void SetVCOInput(int input);
-    int GetVCOInput();
     double GetInputFreq();
     void SetPrimaryFreq(double freq);
     double GetPrimaryFreq();
     void SetSecondaryFreq(double freq);
     double GetSecondaryFreq();
+    int RecalculateFrequencies();
+
+    void SetVCO(CDCM_VCO VCO);
+    CDCM_VCO GetVCO();
+    void SetVCOInput(int input);
+    int GetVCOInput();
     void SetVCOMultiplier(int value);
-    
     
     void SetOutputs(CDCM_Outputs Outputs);
     CDCM_Outputs getOutputs(){return Outputs;};
@@ -111,7 +110,6 @@ public:
     bool IsLocked();
     int GetVersion();
     int SetVersion(uint8_t version);
-
 
     void UpdateOutputFrequencies();
     double SolveFracDiv(double target, CDCM_Output *Output);
@@ -128,16 +126,13 @@ private:
     uint64_t FindGCD(uint64_t a, uint64_t b);
     int GetLowestFreqErr(std::vector<CDCM_VCO> input);
     int FindLowestPSAOutput(std::vector<CDCM_VCO> input);
-    int FindBestVCOConfigIndex(std::vector<CDCM_VCO> &input, int num_errors); //TODO: naming sucks here
+    int FindBestVCOConfigIndex(std::vector<CDCM_VCO> &input, int num_errors);
     CDCM_VCO FindVCOConfig();
     int PrepareToReadRegs();
-    int GetLockStatus();
     
-    FPGA *fpga;
+    lime::FPGA *fpga;
     CDCM_VCO VCO;
     CDCM_Outputs Outputs;
     uint16_t SPI_BASE_ADDR;
     bool is_locked;
 };
-
-}

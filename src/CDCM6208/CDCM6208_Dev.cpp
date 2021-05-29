@@ -10,9 +10,97 @@ CDCM_Dev::CDCM_Dev(FPGA* fpga, uint16_t SPI_BASE_ADDR):
     SPI_BASE_ADDR(SPI_BASE_ADDR),
     is_locked(false)
 {
-   VCO.version = 0;
-   VCO.min_freq = CDCM_VCO_MIN_V1;
-   VCO.max_freq = CDCM_VCO_MAX_V1;
+   VCO.version = 1;
+   VCO.min_freq = CDCM_VCO_MIN_V2;
+   VCO.max_freq = CDCM_VCO_MAX_V2;
+}
+
+/**
+	@brief Initializes CDCM device parameters
+   @param primaryFreq primary VCO input frequency
+   @param secondaryFreq secondary VCO input frequency
+   @return 0 on success -1 on error
+*/
+int CDCM_Dev::Init(double primaryFreq, double secondaryFreq)
+{
+   VCO.prim_freq = primaryFreq;
+   VCO.sec_freq = secondaryFreq;
+
+   Outputs.Y0Y1.requested_freq = 30.72e6;
+   Outputs.Y2Y3.requested_freq = 30.72e6;
+   Outputs.Y4.requested_freq = 30.72e6;
+   Outputs.Y5.requested_freq = 30.72e6;
+   Outputs.Y6.requested_freq = 30.72e6;
+   Outputs.Y7.requested_freq = 30.72e6;
+
+   return DownloadConfiguration();
+}
+
+/**
+	@brief Resets CDCM to the default configuration
+   @param primaryFreq primary VCO input frequency
+   @param secondaryFreq secondary VCO input frequency
+   @return 0 on success -1 on error
+*/
+int CDCM_Dev::Reset(double primaryFreq, double secondaryFreq)
+{
+   VCO.prim_freq = primaryFreq;
+   VCO.sec_freq = secondaryFreq;
+
+   Outputs.Y0Y1.requested_freq = 30.72e6;
+   Outputs.Y2Y3.requested_freq = 30.72e6;
+   Outputs.Y4.requested_freq = 30.72e6;
+   Outputs.Y5.requested_freq = 30.72e6;
+   Outputs.Y6.requested_freq = 30.72e6;
+   Outputs.Y7.requested_freq = 30.72e6;
+
+   struct regVal
+   {
+      uint16_t addr;
+      uint16_t val;
+   };
+   std::map<int, regVal> CDCM_Regs = {
+      {1, {(uint16_t)(SPI_BASE_ADDR+1), 0x0000}},
+      {2, {(uint16_t)(SPI_BASE_ADDR+2), 0x0018}},
+      {3, {(uint16_t)(SPI_BASE_ADDR+3), 0x00F0}},
+      {4, {(uint16_t)(SPI_BASE_ADDR+4), 0x30AF}},
+      {6, {(uint16_t)(SPI_BASE_ADDR+6), 0x0018}},
+      {8, {(uint16_t)(SPI_BASE_ADDR+8), 0x0018}},
+      {9, {(uint16_t)(SPI_BASE_ADDR+9), 0x0003}},
+      {10, {(uint16_t)(SPI_BASE_ADDR+10), 0x0180}},
+      {11, {(uint16_t)(SPI_BASE_ADDR+11), 0x0000}},
+      {12, {(uint16_t)(SPI_BASE_ADDR+12), 0x0003}},
+      {13, {(uint16_t)(SPI_BASE_ADDR+13), 0x0180}},
+      {14, {(uint16_t)(SPI_BASE_ADDR+14), 0x0000}},
+      {15, {(uint16_t)(SPI_BASE_ADDR+15), 0x0003}},
+      {16, {(uint16_t)(SPI_BASE_ADDR+16), 0x0180}},
+      {17, {(uint16_t)(SPI_BASE_ADDR+17), 0x0000}},
+      {18, {(uint16_t)(SPI_BASE_ADDR+18), 0x0013}},
+      {19, {(uint16_t)(SPI_BASE_ADDR+19), 0x0180}},
+      {20, {(uint16_t)(SPI_BASE_ADDR+20), 0x0000}},
+      {23, {(uint16_t)(SPI_BASE_ADDR+23), 0x010A}}
+   };
+   
+   if(SPI_BASE_ADDR == CDCM2_BASE_ADDR)
+   {
+      CDCM_Regs[4].val = 0x2077;
+      CDCM_Regs[18].val = 0x0003;
+   }
+
+   for(auto reg : CDCM_Regs)
+      if(fpga->WriteRegister(reg.second.addr, reg.second.val) != 0)
+         return -1;
+
+   // Load to CDCM
+   if(fpga->WriteRegister(SPI_BASE_ADDR+21, 1) != 0)
+      return -1;
+
+   if(PrepareToReadRegs() != 0)
+      return -1;
+
+   is_locked = !((fpga->ReadRegister(SPI_BASE_ADDR+22)>>2)&1);
+   
+   return DownloadConfiguration();
 }
 
 /**
@@ -138,45 +226,56 @@ int CDCM_Dev::SetFrequency(cdcm_output_t output, double frequency, bool upload)
    CDCM_VCO VCOConfig = FindVCOConfig();
    if(VCOConfig.valid)
    {
-      VCO = VCOConfig;
-      SolveN(VCO.N_mul_full, &VCO.N_mul_8bit, &VCO.N_mul_10bit);
-      
-      VCO.output_freq = GetInputFreq();
-      VCO.output_freq /= VCO.M_div;
-      VCO.output_freq *= VCO.prescaler_A;
-      VCO.output_freq *= VCO.N_mul_full;
+      if(VCOConfig.output_freq > 0)
+      {
+         VCO = VCOConfig;
+         SolveN(VCO.N_mul_full, &VCO.N_mul_8bit, &VCO.N_mul_10bit);
+         
+         VCO.output_freq = GetInputFreq();
+         VCO.output_freq /= VCO.M_div;
+         VCO.output_freq *= VCO.prescaler_A;
+         VCO.output_freq *= VCO.N_mul_full;
+      }
       return_val = 0;
    }
 
    if(Outputs.Y0Y1.used)
       Outputs.Y0Y1.divider_val = (int)round((VCO.output_freq/VCO.prescaler_A)/Outputs.Y0Y1.requested_freq);
-   
+   else
+      Outputs.Y0Y1.divider_val = (int)round((VCO.output_freq/VCO.prescaler_A)/Outputs.Y0Y1.output_freq);
+
    if(Outputs.Y2Y3.used)
       Outputs.Y2Y3.divider_val = (int)round((VCO.output_freq/VCO.prescaler_A)/Outputs.Y2Y3.requested_freq);
+   else
+      Outputs.Y2Y3.divider_val = (int)round((VCO.output_freq/VCO.prescaler_A)/Outputs.Y2Y3.output_freq);
    
    if(Outputs.Y4.used)
-   {
       Outputs.Y4.divider_val = (VCO.output_freq/VCO.prescaler_A)/Outputs.Y4.requested_freq;
-      SolveFracDiv(Outputs.Y4.divider_val, &Outputs.Y4);
-   }
+   else
+      Outputs.Y4.divider_val = (VCO.output_freq/VCO.prescaler_A)/Outputs.Y4.output_freq;
+
+   SolveFracDiv(Outputs.Y4.divider_val, &Outputs.Y4);
 
    if(Outputs.Y5.used)
-   {
       Outputs.Y5.divider_val = (VCO.output_freq/VCO.prescaler_A)/Outputs.Y5.requested_freq;
-      SolveFracDiv(Outputs.Y5.divider_val, &Outputs.Y5);
-   }
+   else
+      Outputs.Y5.divider_val = (VCO.output_freq/VCO.prescaler_A)/Outputs.Y5.output_freq;
+
+   SolveFracDiv(Outputs.Y5.divider_val, &Outputs.Y5);
 
    if(Outputs.Y6.used)
-   {
       Outputs.Y6.divider_val = (VCO.output_freq/VCO.prescaler_A)/Outputs.Y6.requested_freq;
-      SolveFracDiv(Outputs.Y6.divider_val, &Outputs.Y6);
-   }
+   else
+      Outputs.Y6.divider_val = (VCO.output_freq/VCO.prescaler_A)/Outputs.Y6.output_freq;
+
+   SolveFracDiv(Outputs.Y6.divider_val, &Outputs.Y6);
 
    if(Outputs.Y7.used)
-   {
       Outputs.Y7.divider_val = (VCO.output_freq/VCO.prescaler_A)/Outputs.Y7.requested_freq;
-      SolveFracDiv(Outputs.Y7.divider_val, &Outputs.Y7);
-   }
+   else
+      Outputs.Y7.divider_val = (VCO.output_freq/VCO.prescaler_A)/Outputs.Y7.output_freq;
+
+   SolveFracDiv(Outputs.Y7.divider_val, &Outputs.Y7);
 
    UpdateOutputFrequencies();
 
@@ -188,22 +287,25 @@ int CDCM_Dev::SetFrequency(cdcm_output_t output, double frequency, bool upload)
 }
 
 /**
-	@brief Updates VCO configuration based on requested frequencies
+   @brief Updates VCO and Output frequencies based on requested ones
    @return 0 on success -1 on error
 */
-int CDCM_Dev::RecalculateVCO()
+int CDCM_Dev::RecalculateFrequencies()
 {
    int return_val = -1;
    CDCM_VCO VCOConfig = FindVCOConfig();
    if(VCOConfig.valid)
    {
-      VCO = VCOConfig;
-      SolveN(VCO.N_mul_full, &VCO.N_mul_8bit, &VCO.N_mul_10bit);
-      
-      VCO.output_freq = GetInputFreq();
-      VCO.output_freq /= VCO.M_div;
-      VCO.output_freq *= VCO.prescaler_A;
-      VCO.output_freq *= VCO.N_mul_full;
+      if(VCOConfig.output_freq > 0)
+      {
+         VCO = VCOConfig;
+         SolveN(VCO.N_mul_full, &VCO.N_mul_8bit, &VCO.N_mul_10bit);
+         
+         VCO.output_freq = GetInputFreq();
+         VCO.output_freq /= VCO.M_div;
+         VCO.output_freq *= VCO.prescaler_A;
+         VCO.output_freq *= VCO.N_mul_full;
+      }
       return_val = 0;
    }
 
@@ -363,11 +465,11 @@ int CDCM_Dev::UploadConfiguration()
       uint16_t val;
    };
    
-   std::unordered_map<int, regVal> CDCM_Regs = {
+   std::map<int, regVal> CDCM_Regs = {
       {1, {(uint16_t)(SPI_BASE_ADDR+1), 0}},
       {2, {(uint16_t)(SPI_BASE_ADDR+2), 0}},
       {3, {(uint16_t)(SPI_BASE_ADDR+3), 0}},
-      {5, {(uint16_t)(SPI_BASE_ADDR+5), 0}},
+      {4, {(uint16_t)(SPI_BASE_ADDR+4), 0}},
       {6, {(uint16_t)(SPI_BASE_ADDR+6), 0}},
       {8, {(uint16_t)(SPI_BASE_ADDR+8), 0}},
       {9, {(uint16_t)(SPI_BASE_ADDR+9), 0}},
@@ -382,10 +484,10 @@ int CDCM_Dev::UploadConfiguration()
       {18, {(uint16_t)(SPI_BASE_ADDR+18), 0}},
       {19, {(uint16_t)(SPI_BASE_ADDR+19), 0}},
       {20, {(uint16_t)(SPI_BASE_ADDR+20), 0}},
-      {21, {(uint16_t)(SPI_BASE_ADDR+23), 0}}
+      {23, {(uint16_t)(SPI_BASE_ADDR+23), 0}}
    };
    
-   for(int i = 3; i < 21; i+=3) {
+   for(int i = 3; i < 24; i+=3) {
       int reg = i == 6 ? 4 : i; // read 4th register instead of 6th
       int val = fpga->ReadRegister(CDCM_Regs[reg].addr);
       if(val == -1) return -1;
@@ -401,7 +503,7 @@ int CDCM_Dev::UploadConfiguration()
    
    CDCM_Regs[4].val &= ~(0x1F00);
    CDCM_Regs[4].val |= ((VCO.R_div-1)&0xF)<<8;
-   CDCM_Regs[4].val |= ((VCO.input_mux-1)&1) <<12;    
+   CDCM_Regs[4].val |= ((VCO.input_mux-1)&1)<<12;    
    
    CDCM_Regs[6].val = 0 | ((uint16_t)(Outputs.Y0Y1.divider_val-1)&0xFF);
    
@@ -443,18 +545,27 @@ int CDCM_Dev::UploadConfiguration()
 
    CDCM_Regs[20].val = Outputs.Y7.fractional_part&0xFFFF;
 
-   CDCM_Regs[21].val = 1;
+   // TODO: Tomas does this register need to be read before setting it?
+   CDCM_Regs[23].val |= (VCO.version&7)<<3;
 
    for(auto reg : CDCM_Regs)
       if(fpga->WriteRegister(reg.second.addr, reg.second.val) != 0)
          return -1;
+   
+   // Load to CDCM
+   if(fpga->WriteRegister(SPI_BASE_ADDR+21, 1) != 0)
+      return -1;
+
+   // TODO: Tomas figure out why locking only happens when I "prepare" two times in a row
+   if(PrepareToReadRegs() != 0)
+      return -1;
 
    if(PrepareToReadRegs() != 0)
       return -1;
 
    is_locked = !((fpga->ReadRegister(SPI_BASE_ADDR+22)>>2)&1);
    
-   return -1;
+   return 0;
 }
 
 /**
@@ -472,11 +583,11 @@ int CDCM_Dev::DownloadConfiguration()
       uint16_t val;
    };
    
-   std::unordered_map<int, regVal> CDCM_Regs = {
+   std::map<int, regVal> CDCM_Regs = {
       {1, {(uint16_t)(SPI_BASE_ADDR+1), 0}},
       {2, {(uint16_t)(SPI_BASE_ADDR+2), 0}},
       {3, {(uint16_t)(SPI_BASE_ADDR+3), 0}},
-      {5, {(uint16_t)(SPI_BASE_ADDR+5), 0}},
+      {4, {(uint16_t)(SPI_BASE_ADDR+4), 0}},
       {6, {(uint16_t)(SPI_BASE_ADDR+6), 0}},
       {8, {(uint16_t)(SPI_BASE_ADDR+8), 0}},
       {9, {(uint16_t)(SPI_BASE_ADDR+9), 0}},
@@ -558,7 +669,7 @@ int CDCM_Dev::DownloadConfiguration()
 
    UpdateOutputFrequencies();
 
-   return 1;
+   return 0;
 }
 
 /** 
@@ -693,13 +804,12 @@ void CDCM_Dev::UpdateOutputFrequencies()
 }
 
 /** 
-	@brief Calculates CDCM output frequencies based on current VCO configuration
+	@brief Prepare to read the FPGA registers
    @return
 */
 int CDCM_Dev::PrepareToReadRegs()
 {
-   const auto timeout = std::chrono::milliseconds(100);
-   //TODO: ask Servenikas for timeout value
+   const auto timeout = std::chrono::milliseconds(200);
    uint16_t status = 0;
    
    fpga->WriteRegister(SPI_BASE_ADDR+24, 1);
@@ -793,7 +903,6 @@ std::vector<CDCM_VCO> CDCM_Dev::FindValidVCOFreqs(double lcm)
    double lo_freq;
    double hi_freq;
    double frequency;
-   int l_have_error=0;
    for(int version = 0; version < 2; version++)
    {
       placeholder_struct.version = version;
@@ -842,7 +951,7 @@ int CDCM_Dev::FindLowestPSAOutput(std::vector<CDCM_VCO> input)
    int min_nom = 0xFFFFFFF;
    int index = 0;
    int curr_val;
-   for(int i=0; i<input.size(); i++)
+   for(size_t i=0; i<input.size(); i++)
    {
       curr_val = input[i].N_mul_full * input[i].prescaler_A;
       if(curr_val < min_nom)
@@ -863,7 +972,7 @@ int CDCM_Dev::GetLowestFreqErr(std::vector<CDCM_VCO> input)
 {
    double min_err = 100e6;
    int index = 0;
-   for(int i=0; i<input.size(); i++)
+   for(size_t i=0; i<input.size(); i++)
    {
       if(input[i].freq_err < min_err)
       {
@@ -910,17 +1019,10 @@ int CDCM_Dev::FindBestVCOConfigIndex(std::vector<CDCM_VCO> &input, int num_error
 */
 CDCM_VCO CDCM_Dev::FindVCOConfig()
 {
-   // make local variables
-   double l_Y0Y1       = Outputs.Y0Y1.used ? Outputs.Y0Y1.requested_freq : Outputs.Y0Y1.output_freq;
-   double l_Y2Y3       = Outputs.Y2Y3.used ? Outputs.Y2Y3.requested_freq : Outputs.Y2Y3.output_freq;
-   double l_Y4         = Outputs.Y4.used ? Outputs.Y4.requested_freq : Outputs.Y4.output_freq;
-   double l_Y5         = Outputs.Y5.used ? Outputs.Y5.requested_freq : Outputs.Y5.output_freq;
-   double l_Y6         = Outputs.Y6.used ? Outputs.Y6.requested_freq : Outputs.Y6.output_freq;
-   double l_Y7         = Outputs.Y7.used ? Outputs.Y7.requested_freq : Outputs.Y7.output_freq;
+   double l_Y0Y1       = Outputs.Y0Y1.requested_freq;
+   double l_Y2Y3       = Outputs.Y2Y3.requested_freq;
    double input_shift = 1;
-   
    // Eliminate fractional parts by shifting left (if any)
-   // TODO: bug here due to l_Y2Y3 being a float and whole thing gets shifted
    while(!(IsInteger(l_Y0Y1)&&IsInteger(l_Y2Y3)))
    {
       l_Y0Y1      *=10;
@@ -929,7 +1031,6 @@ CDCM_VCO CDCM_Dev::FindVCOConfig()
    }
    
    //Find lowest common multiple
-   double int_gcd;
    double int_lcm;
    bool do_vco_calc=true;
 
@@ -951,7 +1052,7 @@ CDCM_VCO CDCM_Dev::FindVCOConfig()
       int have_error = 0;
       int max_r_div = GetVCOInput() ? 16:1;
 
-      for(int i = 0; i < Config_vector.size(); i++)
+      for(size_t i = 0; i < Config_vector.size(); i++)
       {  
          double min_err = std::numeric_limits<double>::max();
 
@@ -982,10 +1083,15 @@ CDCM_VCO CDCM_Dev::FindVCOConfig()
          Config_vector[best_index].valid = true;
          return Config_vector[best_index];
       }
+      else
+      {
+         CDCM_VCO vco_config;
+         vco_config.valid = false;
+         return vco_config;
+      }
    }
-   //return empty struct if no config found
    //no algorithm for fractional only frequency planning
-   CDCM_VCO emptystruct;
-   emptystruct.valid = false;
-   return emptystruct;
+   CDCM_VCO vco_config;
+   vco_config.valid = true;
+   return vco_config;
 }

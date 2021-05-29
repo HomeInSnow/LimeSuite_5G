@@ -18,35 +18,15 @@ CDCM_controlpanel(parent, id, pos, size, style)
 
 CDCM6208_panelgui::~CDCM6208_panelgui()
 {
-   if(CDCM)
-      delete CDCM;
 }
 
-void CDCM6208_panelgui::Initialize(lms_device_t* pModule, uint16_t SPI_BASE_ADDR)
+void CDCM6208_panelgui::Initialize(CDCM_Dev* cdcm)
 {
-   CDCM = new CDCM_Dev(((LMS7_Device*)pModule)->GetFPGA(), SPI_BASE_ADDR);
-   CDCM->SetPrimaryFreq(primaryFrequency);
-   CDCM->SetSecondaryFreq(secondaryFrequency);
+   this->CDCM = cdcm;
    
    UpdateGUI();
    
-   CDCM_Outputs Outputs = CDCM->getOutputs();
-   m_Baseaddr->SetValue(wxString::Format(_("%i"),SPI_BASE_ADDR));
-   
-   auto str = wxString::Format(_("%f"),0);
-   m_Y0Y1_FREQ_req->SetValue(str);
-   m_Y2Y3_FREQ_req->SetValue(str);
-   m_Y4_FREQ_req->SetValue(str);
-   m_Y5_FREQ_req->SetValue(str);
-   m_Y6_FREQ_req->SetValue(str);
-   m_Y7_FREQ_req->SetValue(str);
-
-   m_Y0Y1_FREQ->SetValue(str);
-   m_Y2Y3_FREQ->SetValue(str);
-   m_Y4_FREQ->SetValue(str);
-   m_Y5_FREQ->SetValue(str);
-   m_Y6_FREQ->SetValue(str);
-   m_Y7_FREQ->SetValue(str);
+   m_Baseaddr->SetValue(wxString::Format(_("%i"),CDCM->GetSPIBaseAddr()));
 }
 
 void CDCM6208_panelgui::OnChange( wxCommandEvent& event )
@@ -237,7 +217,7 @@ void CDCM6208_panelgui::OnFreqEntry( wxCommandEvent& event )
          Outputs.Y7.requested_freq = std::stod((std::string)m_Y7_FREQ_req->GetValue())*1e6;
 
       CDCM->SetOutputs(Outputs);
-      return_val = CDCM->RecalculateVCO();
+      return_val = CDCM->RecalculateFrequencies();
 
       if (return_val == 0)
       {
@@ -283,7 +263,8 @@ void CDCM6208_panelgui::OnButton( wxCommandEvent& event )
       CDCM->UploadConfiguration();
    else if(obj == m_ReadAll)
       CDCM->DownloadConfiguration();   
-
+   else if(obj == m_Reset)
+      CDCM->Reset(30.72e6, 30.72e6);
    //Recalculate();
    UpdateGUI();
 }
@@ -348,6 +329,9 @@ void CDCM6208_panelgui::UpdateGUI()
    //Y0Y1 Frequency
    str = wxString::Format(_("%f"),Outputs.Y0Y1.output_freq/1e6);
    m_Y0Y1_FREQ->SetValue(str);
+
+   str = wxString::Format(_("%f"),Outputs.Y0Y1.requested_freq/1e6);
+   m_Y0Y1_FREQ_req->SetValue(str);
    
    //Y2Y3 divider
    str = wxString::Format(_("%i"),(int)Outputs.Y2Y3.divider_val);
@@ -355,13 +339,20 @@ void CDCM6208_panelgui::UpdateGUI()
    //Y2Y3 Frequency
    str = wxString::Format(_("%f"),Outputs.Y2Y3.output_freq/1e6);
    m_Y2Y3_FREQ->SetValue(str);
+
+   str = wxString::Format(_("%f"),Outputs.Y2Y3.requested_freq/1e6);
+   m_Y2Y3_FREQ_req->SetValue(str);
    
    //Y4 divider
    str = wxString::Format(_("%f"),Outputs.Y4.divider_val);
    m_Y4_DIV->SetValue(str);
+   
    //Y4 Frequency
    str = wxString::Format(_("%f"),Outputs.Y4.output_freq/1e6);
    m_Y4_FREQ->SetValue(str);
+
+   str = wxString::Format(_("%f"),Outputs.Y4.requested_freq/1e6);
+   m_Y4_FREQ_req->SetValue(str);
    
    //Y5 divider
    str = wxString::Format(_("%f"),Outputs.Y5.divider_val);
@@ -370,12 +361,18 @@ void CDCM6208_panelgui::UpdateGUI()
    str = wxString::Format(_("%f"),Outputs.Y5.output_freq/1e6);
    m_Y5_FREQ->SetValue(str);
 
+   str = wxString::Format(_("%f"),Outputs.Y5.requested_freq/1e6);
+   m_Y5_FREQ_req->SetValue(str);
+
    //Y6 divider
    str = wxString::Format(_("%f"),Outputs.Y6.divider_val);
    m_Y6_DIV->SetValue(str);
    //Y6 Frequency
    str = wxString::Format(_("%f"),Outputs.Y6.output_freq/1e6);
    m_Y6_FREQ->SetValue(str);
+
+   str = wxString::Format(_("%f"),Outputs.Y6.requested_freq/1e6);
+   m_Y6_FREQ_req->SetValue(str);
    
    //Y7 divider
    str = wxString::Format(_("%f"),Outputs.Y7.divider_val);
@@ -383,6 +380,9 @@ void CDCM6208_panelgui::UpdateGUI()
    //Y7 Frequency
    str = wxString::Format(_("%f"),Outputs.Y7.output_freq/1e6);
    m_Y7_FREQ->SetValue(str);
+
+   str = wxString::Format(_("%f"),Outputs.Y7.requested_freq/1e6);
+   m_Y7_FREQ_req->SetValue(str);
 
    //PLL Lock status
    if(CDCM->IsLocked())

@@ -91,6 +91,7 @@ class CDCM_controlpanel : public wxPanel
 		wxStaticText* m_LockStatus;
 		wxButton* m_WriteAll;
 		wxButton* m_ReadAll;
+		wxButton* m_Reset;
 		wxStaticText* m_staticText42;
 		wxCheckBox* m_Y0Y1_chk;
 		wxStaticText* m_staticText43;
