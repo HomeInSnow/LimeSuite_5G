@@ -45,6 +45,153 @@ unsigned LMS7_LimeSDR_5GRadio::GetNumChannels(const bool tx) const
     return 6;
 }
 
+std::vector<std::string> LMS7_LimeSDR_5GRadio::GetPathNames(bool dir_tx, unsigned chan) const
+{
+    if(chan == 0 || chan == 1) // LMS1
+    {
+        if(dir_tx)
+            return {"NONE", "BAND1", "BAND2"};
+        else    
+            return {"NONE", "LNAH", "LNAL", "LNAW_NC"};
+    }
+
+    if(chan == 2 || chan == 3) // LMS2
+    {
+        return {"NONE", "TDD_TX", "TDD_RX", "FDD", "Cal"};
+    }
+    
+    if(chan == 4 || chan == 5) // LMS3
+    {
+        if(dir_tx)
+            return {"NONE"};
+        else
+            return {"NONE", "LNAH", "Cal"};
+    }
+    return {};
+}
+
+int LMS7_LimeSDR_5GRadio::SetPath(bool tx, unsigned chan, unsigned path)
+{
+    uint16_t sw_addr = 0x00D1;
+    uint16_t pa_addr = 0x00D2;
+    uint16_t sw_val = fpga->ReadRegister(sw_addr);
+    uint16_t pa_val = fpga->ReadRegister(pa_addr);
+    lime::LMS7002M* lms = SelectChannel(chan);
+
+    if(chan == 0 || chan == 1)
+    {
+        if(tx)
+        {
+            pa_val |= 1 << (4+chan);
+
+            if(path == LMS_PATH_NONE)
+                pa_val &= ~(1 << (4+chan));
+            else if (path == LMS_PATH_TX1)
+                sw_val |= 1 << (12+chan);
+            else if (path == LMS_PATH_TX2)
+                sw_val &= ~(1 << (12+chan)); 
+            
+            fpga->WriteRegister(sw_addr, sw_val);
+            fpga->WriteRegister(pa_addr, pa_val);
+            return lms->SetBandTRF(path);
+        }
+        else
+        {
+            if(path == LMS_PATH_LNAW)
+                lime::warning("LNAW has no connection to RF ports");
+            else if (path == LMS_PATH_LNAH)
+                sw_val |= 1 << (10+chan);
+            else if(path == LMS_PATH_LNAL)
+                sw_val &= ~(1UL << (10+chan));
+
+            fpga->WriteRegister(sw_addr, sw_val);
+            return lms->SetPathRFE(lime::LMS7002M::PathRFE(path));
+        }
+    }
+    if(chan == 2 || chan == 3)
+    {
+        int tx_path = LMS_PATH_TX1;
+        int rx_path = LMS_PATH_LNAH;
+        uint16_t shift = chan == 2 ? 0 : 2;
+        pa_val |= 1 << (chan == 2 ? 3 : 2);         // enable PA
+        pa_val &= ~(1 << (chan == 2 ? 1 : 0));      // enable LNA 
+        if (path == 0)
+        {
+            pa_val &= ~(1 << (chan == 2 ? 3 : 2));  // disable
+            pa_val = 1 << (chan == 2 ? 1 : 0);      // disable LNA
+            tx_path = LMS_PATH_NONE;
+            rx_path = LMS_PATH_NONE;
+        }
+        else if (path == 1) // TDD_TX
+        {
+            if(chan == 2)
+                sw_val &= ~(1 << 7);                // TRX1T to RSFW_TRX1
+            else
+                sw_val |= 1 << 9;                   // TRX2T to RSFW_TRX2
+            sw_val |= 1 << (6+shift);               // TRX1 or TRX2 to J8 or J10
+            sw_val &= ~(1 << (2+shift));            // RX1C or RX2C to RX1IN or RX2IN (LNA)
+            sw_val |= 1 << (3+shift);               // RX1IN or RX2IN to RFSW_TRX1 or RFSW_TRX1
+        }
+        else if (path == 2) // TDD_RX
+        {
+            if(chan == 2)
+                sw_val |= 1 << 9;                   // TRX2T to ground
+            else
+                sw_val &= ~(1 << 7);                // TRX1T to ground
+            sw_val &= ~(1 << (6+shift));            // TRX1 or TRX2 to J8 or J10
+            sw_val &= ~(1 << (2+shift));            // RX1C or RX2C to RX1IN or RX2IN (LNA)
+            sw_val |= 1 << (3+shift);               // RX1IN or RX2IN to RFSW_TRX1 or RFSW_TRX1
+        }
+        else if (path == 3) // FDD
+        {
+            if(chan == 2)
+                sw_val &= ~(1 << 7);                // TRX1T to RSFW_TRX1
+            else
+                sw_val |= 1 << 9;                   // TRX2T to RSFW_TRX2
+            sw_val |= 1 << (6+shift);               // TRX1 or TRX2 to J8 or J10
+            sw_val &= ~(1 << (2+shift));            // RX1C or RX2C to RX1IN or RX2IN (LNA)
+            sw_val &= ~(1 << (3+shift));            // RX1IN or RX2In to J9 or  J11
+        }
+        else if (path == 4) // Cal
+        {
+            if(chan == 2)
+                sw_val |= 1 << 9;                   // TRX2T to ground
+            else
+                sw_val &= ~(1 << 7);                // TRX1T to ground
+            sw_val |= 1 << (6+shift);               // TRX1 or TRX2 to J8 or J10
+            sw_val |= 1 << (2+shift);            // RX1C or RX2C to LMS3 TX1_1 or TX2_1
+            sw_val |= 1 << (3+shift);               // RX1IN or RX2IN to RFSW_TRX1 or RFSW_TRX1
+            pa_val = 1 << (chan == 2 ? 1 : 0);      // disable LNA
+        }
+
+        fpga->WriteRegister(sw_addr, sw_val);
+        fpga->WriteRegister(pa_addr, pa_val);
+        lms->SetBandTRF(tx_path);
+        return lms->SetPathRFE(lime::LMS7002M::PathRFE(rx_path));
+    }
+    if(chan == 4 || chan == 5)
+    {
+        if(tx)
+        {
+            lime::warning("TX has no connection to RF ports");
+            return lms->SetBandTRF(path);
+        }
+        else
+        {
+            if(path == LMS_PATH_NONE || path > 2)
+                return lms->SetPathRFE(lime::LMS7002M::PathRFE(LMS_PATH_NONE));
+            else if(path == LMS_PATH_LNAH)
+                sw_val &= ~(1 << (chan-4));
+            else if (path == 2) // Calibration path
+                sw_val |= 1 << (chan-4);
+
+            fpga->WriteRegister(sw_addr, sw_val);
+            return lms->SetPathRFE(lime::LMS7002M::PathRFE(LMS_PATH_LNAH));
+        }
+    }
+    return 0;
+}
+
 int LMS7_LimeSDR_5GRadio::SetRate(double f_Hz, int oversample)
 {
     double nco_f=0;

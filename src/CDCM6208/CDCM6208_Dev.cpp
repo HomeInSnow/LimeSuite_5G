@@ -556,9 +556,7 @@ int CDCM_Dev::UploadConfiguration()
    if(fpga->WriteRegister(SPI_BASE_ADDR+21, 1) != 0)
       return -1;
 
-   // TODO: Tomas figure out why locking only happens when I "prepare" two times in a row
-   if(PrepareToReadRegs() != 0)
-      return -1;
+   std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
    if(PrepareToReadRegs() != 0)
       return -1;

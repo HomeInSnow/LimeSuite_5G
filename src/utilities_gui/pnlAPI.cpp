@@ -275,7 +275,7 @@ void pnlAPI::OnRun( wxCommandEvent& event )
 void pnlAPI::OnAntDir( wxCommandEvent& event )
 {
     lms_name_t list[16];
-    int cnt = LMS_GetAntennaList(lmsControl, event.GetInt(), 0, list);
+    int cnt = LMS_GetAntennaList(lmsControl, event.GetInt(), setAntCh->GetSelection(), list);
     setAntAnt->Clear();
     for (int i = 0; i < cnt; i++)
         setAntAnt->Append(list[i]);

@@ -243,6 +243,7 @@ set(LMS7SUITE_GUI_SOURCES
     boards_wxgui/pnlBuffers.cpp
     boards_wxgui/pnlCoreSDR.cpp
     boards_wxgui/pnlLimeNetMicro.cpp
+    boards_wxgui/pnl5GRadio.cpp
     ${PROJECT_SOURCE_DIR}/external/kissFFT/kiss_fft.c
     windowFunction.cpp
     boards_wxgui/pnlLimeSDR.cpp
