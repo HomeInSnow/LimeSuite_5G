@@ -34,6 +34,25 @@ LMS7_LimeSDR_5GRadio::LMS7_LimeSDR_5GRadio(lime::IConnection* conn, LMS7_Device 
 
 int LMS7_LimeSDR_5GRadio::Init()
 {
+    struct regVal
+    {
+        uint16_t adr;
+        uint16_t val;
+    };
+
+    const std::vector<regVal> fpgaInitVals = {
+        {0x00D1, 0x3357}, {0x00D2, 0x003C}
+    };
+    
+    for (auto i : fpgaInitVals)
+        fpga->WriteRegister(i.adr, i.val);
+
+    uint8_t paramId = 2;
+    double dacVal = 0;
+    connection->CustomParameterWrite(&paramId,&dacVal,1,"");
+    paramId = 3;
+    connection->CustomParameterWrite(&paramId,&dacVal,1,"");
+
     if(cdcm[0]->Reset(30.72e6, 30.72e6) != 0 
     || cdcm[1]->Reset(30.72e6, 30.72e6) != 0)
         return -1;
