@@ -101,14 +101,14 @@ int LMS7_LimeSDR_5GRadio::SetPath(bool tx, unsigned chan, unsigned path)
     {
         if(tx)
         {
-            pa_val |= 1 << (4+chan);
+            pa_val |= 1 << (5-chan);
 
             if(path == LMS_PATH_NONE)
-                pa_val &= ~(1 << (4+chan));
+                pa_val &= ~(1 << (5-chan)); // chan 0 = 5; chan 1 = 4
             else if (path == LMS_PATH_TX1)
-                sw_val |= 1 << (12+chan);
+                sw_val |= 1 << (13-chan);   // chan 0 = 13; chan 1 = 12
             else if (path == LMS_PATH_TX2)
-                sw_val &= ~(1 << (12+chan)); 
+                sw_val &= ~(1 << (13-chan)); 
             
             fpga->WriteRegister(sw_addr, sw_val);
             fpga->WriteRegister(pa_addr, pa_val);
@@ -119,9 +119,9 @@ int LMS7_LimeSDR_5GRadio::SetPath(bool tx, unsigned chan, unsigned path)
             if(path == LMS_PATH_LNAW)
                 lime::warning("LNAW has no connection to RF ports");
             else if (path == LMS_PATH_LNAH)
-                sw_val |= 1 << (10+chan);
+                sw_val |= 1 << (11-chan);
             else if(path == LMS_PATH_LNAL)
-                sw_val &= ~(1UL << (10+chan));
+                sw_val &= ~(1UL << (11-chan));
 
             fpga->WriteRegister(sw_addr, sw_val);
             return lms->SetPathRFE(lime::LMS7002M::PathRFE(path));
@@ -149,14 +149,14 @@ int LMS7_LimeSDR_5GRadio::SetPath(bool tx, unsigned chan, unsigned path)
                 sw_val |= 1 << 9;                   // TRX2T to RSFW_TRX2
             sw_val |= 1 << (6+shift);               // TRX1 or TRX2 to J8 or J10
             sw_val &= ~(1 << (2+shift));            // RX1C or RX2C to RX1IN or RX2IN (LNA)
-            sw_val |= 1 << (3+shift);               // RX1IN or RX2IN to RFSW_TRX1 or RFSW_TRX1
+            sw_val |= 1 << (3+shift);               // RX1IN or RX2IN to RFSW_TRX1 or RFSW_TRX2
         }
         else if (path == 2) // TDD_RX
         {
             if(chan == 2)
-                sw_val |= 1 << 9;                   // TRX2T to ground
+                sw_val |= 1 << 7;                   // TRX1T to ground
             else
-                sw_val &= ~(1 << 7);                // TRX1T to ground
+                sw_val &= ~(1 << 9);                // TRX2T to ground
             sw_val &= ~(1 << (6+shift));            // TRX1 or TRX2 to J8 or J10
             sw_val &= ~(1 << (2+shift));            // RX1C or RX2C to RX1IN or RX2IN (LNA)
             sw_val |= 1 << (3+shift);               // RX1IN or RX2IN to RFSW_TRX1 or RFSW_TRX1
@@ -174,13 +174,13 @@ int LMS7_LimeSDR_5GRadio::SetPath(bool tx, unsigned chan, unsigned path)
         else if (path == 4) // Cal
         {
             if(chan == 2)
-                sw_val |= 1 << 9;                   // TRX2T to ground
+                sw_val |= 1 << 7;                   // TRX1T to ground
             else
-                sw_val &= ~(1 << 7);                // TRX1T to ground
+                sw_val &= ~(1 << 9);                // TRX2T to ground
             sw_val |= 1 << (6+shift);               // TRX1 or TRX2 to J8 or J10
             sw_val |= 1 << (2+shift);            // RX1C or RX2C to LMS3 TX1_1 or TX2_1
             sw_val |= 1 << (3+shift);               // RX1IN or RX2IN to RFSW_TRX1 or RFSW_TRX1
-            pa_val = 1 << (chan == 2 ? 1 : 0);      // disable LNA
+            pa_val |= 1 << (chan == 2 ? 1 : 0);      // disable LNA
         }
 
         fpga->WriteRegister(sw_addr, sw_val);

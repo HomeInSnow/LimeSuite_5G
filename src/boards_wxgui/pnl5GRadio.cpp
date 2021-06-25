@@ -276,8 +276,8 @@ void pnl5GRadio::OnInputChange(wxCommandEvent& event)
     value |= cmbLms2Trx2TPath->GetSelection() << 9;
     value |= cmbLms1Rx2Path->GetSelection() << 10;
     value |= cmbLms1Rx1Path->GetSelection() << 11;
-    value |= cmbLms1Tx1Path->GetSelection() << 12;
-    value |= cmbLms1Tx2Path->GetSelection() << 13;
+    value |= cmbLms1Tx2Path->GetSelection() << 12;
+    value |= cmbLms1Tx1Path->GetSelection() << 13;
 
     if(LMS_WriteFPGAReg(lmsControl,addr, value))
         wxMessageBox(_("Failed to write FPGA registers"), _("Error"), wxICON_ERROR | wxOK);
@@ -328,8 +328,8 @@ void pnl5GRadio::UpdatePanel()
     cmbLms2Trx2TPath->SetSelection((value>>9)&1);
     cmbLms1Rx2Path->SetSelection((value>>10)&1);
     cmbLms1Rx1Path->SetSelection((value>>11)&1);
-    cmbLms1Tx1Path->SetSelection((value>>12)&1);
-    cmbLms1Tx2Path->SetSelection((value>>13)&1);
+    cmbLms1Tx2Path->SetSelection((value>>12)&1);
+    cmbLms1Tx1Path->SetSelection((value>>13)&1);
 
     addr = 0x00D2;
     value = 0;
