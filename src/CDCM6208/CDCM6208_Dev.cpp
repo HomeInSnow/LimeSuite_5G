@@ -110,7 +110,7 @@ int CDCM_Dev::Reset(double primaryFreq, double secondaryFreq)
 void CDCM_Dev::SetPrimaryFreq(double freq)
 {
    VCO.prim_freq = freq;
-   if(GetVCOInput() == 0)
+   if(GetVCOInput() == 2)
       UpdateOutputFrequencies();
 }
 
@@ -149,7 +149,7 @@ double CDCM_Dev::GetSecondaryFreq()
 */
 double CDCM_Dev::GetInputFreq()
 {
-   if(GetVCOInput() == 1)
+   if(GetVCOInput() == 2)
       return VCO.prim_freq/VCO.R_div;
    else
       return VCO.sec_freq;
@@ -167,7 +167,7 @@ void CDCM_Dev::SetVCOInput(int input)
 
 /**
 	@brief Returns which VCO input is selected
-	@return 1 - primary, 0 - secondary 
+	@return 2 - primary, 1 - secondary 
 */
 int CDCM_Dev::GetVCOInput()
 {

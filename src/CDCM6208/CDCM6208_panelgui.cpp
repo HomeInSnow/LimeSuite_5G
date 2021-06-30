@@ -291,7 +291,7 @@ void CDCM6208_panelgui::UpdateGUI()
       m_PrimarySel->SetValue(false);
       m_SecondarySel->SetValue(true);
    }
-   else
+   else if (VCO.input_mux == 1)
    {
       m_PrimarySel->SetValue(true);
       m_SecondarySel->SetValue(false);
