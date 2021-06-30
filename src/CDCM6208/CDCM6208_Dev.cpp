@@ -157,7 +157,7 @@ double CDCM_Dev::GetInputFreq()
 
 /**
 	@brief Selects VCO input
-	@param input 1 - primary, 0 - secondary 
+	@param input 2 - primary, 1 - secondary 
 */
 void CDCM_Dev::SetVCOInput(int input)
 {
@@ -483,8 +483,7 @@ int CDCM_Dev::UploadConfiguration()
       {17, {(uint16_t)(SPI_BASE_ADDR+17), 0}},
       {18, {(uint16_t)(SPI_BASE_ADDR+18), 0}},
       {19, {(uint16_t)(SPI_BASE_ADDR+19), 0}},
-      {20, {(uint16_t)(SPI_BASE_ADDR+20), 0}},
-      {23, {(uint16_t)(SPI_BASE_ADDR+23), 0}}
+      {20, {(uint16_t)(SPI_BASE_ADDR+20), 0}}
    };
    
    for(int i = 3; i < 24; i+=3) {
@@ -544,9 +543,6 @@ int CDCM_Dev::UploadConfiguration()
    CDCM_Regs[19].val |= (Outputs.Y7.fractional_part>>16)&0xF;
 
    CDCM_Regs[20].val = Outputs.Y7.fractional_part&0xFFFF;
-
-   // TODO: Tomas does this register need to be read before setting it?
-   CDCM_Regs[23].val |= (VCO.version&7)<<3;
 
    for(auto reg : CDCM_Regs)
       if(fpga->WriteRegister(reg.second.addr, reg.second.val) != 0)
@@ -891,9 +887,10 @@ double CDCM_Dev::DecToFrac(double decimal, int* num, int* den)
 /** 
 	@brief Find all available VCO configurations based on lcm value
    @param lcm lcm value
+   @param version VCO version
    @return All available VCO configurations
 */
-std::vector<CDCM_VCO> CDCM_Dev::FindValidVCOFreqs(double lcm)
+std::vector<CDCM_VCO> CDCM_Dev::FindValidVCOFreqs(double lcm, int version)
 {
    // find number of valid vco freqs for each prescaler
    std::vector<CDCM_VCO> Config_vector;
@@ -901,26 +898,24 @@ std::vector<CDCM_VCO> CDCM_Dev::FindValidVCOFreqs(double lcm)
    double lo_freq;
    double hi_freq;
    double frequency;
-   for(int version = 0; version < 2; version++)
-   {
-      placeholder_struct.version = version;
-      placeholder_struct.min_freq = version == 0 ? CDCM_VCO_MIN_V1 : CDCM_VCO_MIN_V2;
-      placeholder_struct.max_freq = version == 0 ? CDCM_VCO_MAX_V1 : CDCM_VCO_MAX_V2;
 
-      for (int prescaler=4; prescaler<=6; prescaler++)
+   placeholder_struct.version = version;
+   placeholder_struct.min_freq = version == 0 ? CDCM_VCO_MIN_V1 : CDCM_VCO_MIN_V2;
+   placeholder_struct.max_freq = version == 0 ? CDCM_VCO_MAX_V1 : CDCM_VCO_MAX_V2;
+
+   for (int prescaler=4; prescaler<=6; prescaler++)
+   {
+      //Find low and high bounds for current prescaler
+      lo_freq=placeholder_struct.min_freq/prescaler;
+      hi_freq=placeholder_struct.max_freq/prescaler;
+      frequency = ceil(lo_freq/lcm)*lcm;
+      while(frequency < hi_freq)
       {
-         //Find low and high bounds for current prescaler
-         lo_freq=placeholder_struct.min_freq/prescaler;
-         hi_freq=placeholder_struct.max_freq/prescaler;
-         frequency = ceil(lo_freq/lcm)*lcm;
-         while(frequency < hi_freq)
-         {
-               placeholder_struct.prescaler_A = prescaler;
-               placeholder_struct.prescaler_B = prescaler;
-               placeholder_struct.output_freq = frequency;
-               Config_vector.push_back(placeholder_struct);
-               frequency += lcm;
-         }
+            placeholder_struct.prescaler_A = prescaler;
+            placeholder_struct.prescaler_B = prescaler;
+            placeholder_struct.output_freq = frequency;
+            Config_vector.push_back(placeholder_struct);
+            frequency += lcm;
       }
    }
    return Config_vector;
@@ -1045,7 +1040,7 @@ CDCM_VCO CDCM_Dev::FindVCOConfig()
    {
       // find number of valid vco freqs for each prescaler
       std::vector<CDCM_VCO> Config_vector;
-      Config_vector = FindValidVCOFreqs(int_lcm);
+      Config_vector = FindValidVCOFreqs(int_lcm, VCO.version);
 
       int have_error = 0;
       int max_r_div = GetVCOInput() ? 16:1;

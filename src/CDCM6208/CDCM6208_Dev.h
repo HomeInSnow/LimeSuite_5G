@@ -122,7 +122,7 @@ private:
     void CalculateFracDiv(CDCM_Output *Output);
     double DecToFrac(double target, int* num, int* den);
     bool IsInteger(double var) {return var==(int64_t)var;}
-    std::vector<CDCM_VCO> FindValidVCOFreqs(double lcm);
+    std::vector<CDCM_VCO> FindValidVCOFreqs(double lcm, int version);
     uint64_t FindGCD(uint64_t a, uint64_t b);
     int GetLowestFreqErr(std::vector<CDCM_VCO> input);
     int FindLowestPSAOutput(std::vector<CDCM_VCO> input);
