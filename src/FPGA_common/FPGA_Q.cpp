@@ -6,6 +6,7 @@
 #include <vector>
 #include <map>
 #include <math.h>
+#include <iostream>
 
 namespace lime
 {
@@ -17,6 +18,7 @@ int FPGA_Q::SetInterfaceFreq(double txRate_Hz, double rxRate_Hz, double txPhase,
 {
     lime::FPGA::FPGA_PLL_clock clocks[2];
 
+    std::cerr<< "FPGA_Q" << std::endl;
     if (channel == 2)
     {
         clocks[0].index = 0;

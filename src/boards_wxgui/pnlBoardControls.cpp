@@ -203,6 +203,10 @@ pnlBoardControls::pnlBoardControls(wxWindow* parent, wxWindowID id, const wxStri
 
     sizerAdditionalControls = new wxFlexGridSizer(0, 1, 0, 0);
     fgSizer247->Add(sizerAdditionalControls, 1, wxEXPAND, 5);
+
+    tabsNotebook = new wxNotebook(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBK_TOP);    
+    fgSizer247->Add(tabsNotebook);
+
     this->SetSizer( fgSizer247 );
     this->Layout();
     fgSizer247->Fit( this );
@@ -535,6 +539,7 @@ void pnlBoardControls::SetupControls(const std::string &boardID)
         pnl->Initialize(lmsControl);
         additionalControls = pnl;
         sizerAdditionalControls->Add(additionalControls);
+
     }
     Layout();
     Fit();

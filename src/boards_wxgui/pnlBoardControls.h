@@ -24,6 +24,8 @@
 #include <string>
 #include <stdint.h>
 #include <LMSBoards.h>
+#include <wx/notebook.h>
+#include <wx/panel.h>
 
 namespace lime{
 }
@@ -64,6 +66,13 @@ class pnlBoardControls : public wxFrame
             wxStaticText* units;
             wxStaticText* rValue;
             wxSpinCtrl* wValue;
+        };
+
+enum
+	{
+			
+			ID_TABS_NOTEBOOK
+
         };
 
         pnlBoardControls(wxWindow* parent, wxWindowID id = wxID_ANY, const wxString &title = _(""), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTAB_TRAVERSAL);
@@ -113,6 +122,8 @@ class pnlBoardControls : public wxFrame
         wxButton* btnWriteAll;
         wxStaticText* m_staticText349;
         wxChoice* cmbBoardSelection;
+        wxNotebook * tabsNotebook; 
+        wxPanel * panel0;
 
 
 

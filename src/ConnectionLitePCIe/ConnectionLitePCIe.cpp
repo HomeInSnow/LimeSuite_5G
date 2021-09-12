@@ -186,3 +186,23 @@ int ConnectionLitePCIe::FinishDataSending(const char* buffer, uint32_t length, i
 {
     return contextHandle;
 }
+
+
+// B.J.
+int ConnectionLitePCIe::ReadDPDBuffer(char* buffer, unsigned length)
+{	
+
+        WriteRegister(0x01A0, length / 24);  // lenght
+        uint16_t interface_cfg;
+        ReadRegister(0x01A1, interface_cfg);
+	interface_cfg = (interface_cfg & ~0x1); // reset lsb
+        WriteRegister(0x01A1, interface_cfg);
+        ReadRegister(0x01A1, interface_cfg);
+	interface_cfg = (interface_cfg |  0x1); // set lsb
+        WriteRegister(0x01A1, interface_cfg);
+
+	int totalBytesReaded = ReceiveData(buffer, length, 2, 1000);
+	return totalBytesReaded;
+
+}
+// end B.J.

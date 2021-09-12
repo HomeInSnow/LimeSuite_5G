@@ -6,6 +6,7 @@
 #include <vector>
 #include <map>
 #include <math.h>
+#include <iostream>
 
 namespace lime
 {
@@ -18,6 +19,8 @@ int FPGA_5G::SetInterfaceFreq(double txRate_Hz, double rxRate_Hz, double txPhase
         return 0;
 
     lime::FPGA::FPGA_PLL_clock clocks[2];
+
+    std::cerr<< "FPGA_5G" << std::endl;
 
     clocks[0].index = 0;
     clocks[0].outFrequency = rxRate_Hz;
@@ -32,7 +35,10 @@ int FPGA_5G::SetInterfaceFreq(double txRate_Hz, double rxRate_Hz, double txPhase
     clocks[1].index = 1;
     clocks[1].outFrequency = txRate_Hz;
     clocks[1].phaseShift_deg = txPhase;
-    if (SetPllFrequency(0, txRate_Hz, clocks, 2)!=0)
+    //clocks[2].index = 2; // B.J.
+    //clocks[2].outFrequency = 2*txRate_Hz; // B.J.
+    //clocks[2].phaseShift_deg = txPhase;
+    if (SetPllFrequency(0, txRate_Hz, clocks, 2)!=0)  //B.J.
         return -1;
 
     return 0;

@@ -18,6 +18,8 @@ public:
 
     int Write(const unsigned char *buffer, int length, int timeout_ms = 100) override;
     int Read(unsigned char *buffer, int length, int timeout_ms = 100) override;
+
+    int ReadDPDBuffer(char* buffer, unsigned length) override;  // B.J.
 protected:
     int GetBuffersCount() const override;
     int CheckStreamSize(int size) const override;

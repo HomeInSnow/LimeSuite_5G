@@ -249,6 +249,11 @@ set(LMS7SUITE_GUI_SOURCES
     boards_wxgui/pnlLimeSDR.cpp
     boards_wxgui/pnlGPIO.cpp
     boards_wxgui/pnl5G.cpp
+    CFRTest/CFRTest.cpp
+    DPDTest/DPDTest.cpp
+    DPDTest/dlgADPDControls.cpp
+    DPDTest/nrc.cpp
+    DPDTest/qadpd.cpp 
 )
 
 include(FeatureSummary)
@@ -268,6 +273,8 @@ if (ENABLE_GUI)
     include_directories(boards_wxgui)
     include_directories(limeRFE)
     include_directories(CDCM6208)
+    include_directories(CFRTest)
+    include_directories(DPDTest)
 
     include(${wxWidgets_USE_FILE})
     add_subdirectory(oglGraph)
