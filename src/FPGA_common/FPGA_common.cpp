@@ -906,7 +906,7 @@ namespace lime
         */
         
 
-        /*
+        
         for (int i = 0; i < 10; i++) //attempt phase search 10 times
         {
             clocks[0].index = 0;
@@ -920,7 +920,7 @@ namespace lime
             clocks[1].findPhase = true;
 
             clocks[2].index = 2;
-            clocks[2].phaseShift_deg = txPhC1 + txPhC2 * txRate_Hz;
+            clocks[2].phaseShift_deg = 0;
             clocks[2].outFrequency = txRate_Hz;
             clocks[2].findPhase = true;
 
@@ -931,7 +931,7 @@ namespace lime
                 break;
             }
         }
-        */
+        
 
         //}
         phaseSearchSuccess =  false;
@@ -969,7 +969,7 @@ namespace lime
 
             if (SetPllFrequency(pll_ind, txRate_Hz, clocks, 3) == 0)
             {
-                lime::error("drugi put uspesno");
+                lime::error("second time sucessfull");
                 //status = 1;
                 //phaseSearchSuccess = true;
                 //break;
